@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SharkNet Login</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+    <div class="login-container">
+        <h1>SharkNet</h1>
+        <h2>NSU Student Login</h2>
+
+        <form action="home.html">
+            
+            <input type="email" 
+                   id="email" 
+                   name="email" 
+                   placeholder="Enter your NSU email" 
+                   required>
+
+            <button type="submit">Login</button>
+
+        </form>
+
+        <p id="error-message" style="color:red;"></p>
+    </div>
+
+    <script>
+        const form = document.querySelector("form");
+        const errorMessage = document.getElementById("error-message");
+
+        form.addEventListener("submit", function(event) {
+            const email = document.getElementById("email").value;
+
+            if (!email.toLowerCase().includes("nsu")) {
+                event.preventDefault();
+                errorMessage.textContent = "You must use a valid NSU email.";
+            } else {
+                errorMessage.textContent = "";
+            }
+        });
+    </script>
+
+</body>
+</html>
