@@ -1,11 +1,72 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Home - SharkNet</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SharkNet Homepage</title>
+    <link rel="stylesheet" href="../css/homepage.css">
 </head>
 <body>
+    <!-- Header -->
+    <header class="header">
+        <div class="welcome-message">
+            <h1>SharkNet Home</h1>
+            <p>Your hub for tutors, discussions, and learning resources.</p>
+        </div>
+        <nav class="nav-buttons">
+            <button onclick="location.href='home.html'">Home</button>
+            <button onclick="location.href='discussions.html'">Discussions</button>
+            <button onclick="location.href='tutors.html'">Find a Tutor</button>
+        </nav>
+    </header>
 
-    <h1> This will be the homepage</h1>
+    <!-- Trending Discussions Section -->
+    <section class="featured-section">
+        <h2>Trending Discussions</h2>
+        <div class="card-grid">
+            <div class="card">
+                <h3>Calculus Help</h3>
+                <p>Students discussing integrals, derivatives, and more.</p>
+                <button onclick="location.href='discussions.html'">Join Discussion</button>
+            </div>
+            <div class="card">
+                <h3>Physics Q&A</h3>
+                <p>Explore solutions and help each other solve tricky problems.</p>
+                <button onclick="location.href='discussions.html'">Join Discussion</button>
+            </div>
+            <div class="card">
+                <h3>Essay Writing Tips</h3>
+                <p>Share strategies for research papers, essays, and assignments.</p>
+                <button onclick="location.href='discussions.html'">Join Discussion</button>
+            </div>
+        </div>
+    </section>
 
+    <!-- Featured Tutors Section -->
+    <section class="featured-section tutors-section">
+        <h2>Featured Tutors</h2>
+        <div class="card-grid">
+            <div class="card">
+                <h3>Jane Doe</h3>
+                <p>Math Tutor – Calculus & Algebra</p>
+                <button onclick="location.href='tutors.html'">Book Session</button>
+            </div>
+            <div class="card">
+                <h3>John Smith</h3>
+                <p>Physics Tutor – Mechanics & Thermodynamics</p>
+                <button onclick="location.href='tutors.html'">Book Session</button>
+            </div>
+            <div class="card">
+                <h3>Emily Lee</h3>
+                <p>English Tutor – Writing & Literature</p>
+                <button onclick="location.href='tutors.html'">Book Session</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 SharkNet • Prototype</p>
+    </footer>
 </body>
 </html>

@@ -1,64 +1,122 @@
-/* Full page styling */
+/* Page background */
 body {
     margin: 0;
     padding: 0;
     font-family: Arial, Helvetica, sans-serif;
-    background: linear-gradient(135deg, #0057b8, #00aaff);
+
+    background-image: url("../images/ocean.avif");
+    background-size: cover;
+    background-position: center;
+
     height: 100vh;
+
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* Login Card */
+
+/* Login card */
 .login-container {
-    background-color: white;
-    padding: 40px;
-    border-radius: 12px;
-    width: 350px;
-    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+    background-color: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+
+    padding: 50px 45px;
+    border-radius: 20px;
+    width: 420px;
+
     text-align: center;
+
+    box-shadow: 0px 20px 45px rgba(0,0,0,0.35);
 }
 
-/* Titles */
+
+/* Logo */
+.logo {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 105px;
+}
+
+
+/* Title */
 .login-container h1 {
-    margin-bottom: 5px;
-}
-
-.login-container h2 {
     margin-top: 0;
-    margin-bottom: 25px;
-    color: #555;
+    margin-bottom: 12px;
+    font-size: 34px;
+    font-weight: 700;
 }
 
-/* Input Field */
-input[type="email"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+
+/* Subtitle */
+.subtitle {
+    font-size: 15px;
+    color: #555;
+    margin-bottom: 32px;
+    line-height: 1.6;
+}
+
+
+/* Input label */
+label {
+    display: block;
+    text-align: left;
+    margin-bottom: 6px;
     font-size: 14px;
 }
+
+
+/* Email input */
+input[type="email"] {
+    width: 100%;
+    padding: 13px;
+    margin-bottom: 24px;
+
+    border-radius: 8px;
+    border: 1px solid #ccc;
+
+    font-size: 14px;
+}
+
+
+/* Input focus effect */
+input:focus {
+    outline: none;
+    border: 2px solid #0057b8;
+}
+
 
 /* Button */
 button {
     width: 100%;
-    padding: 10px;
+    padding: 13px;
+
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
+
     background-color: #0057b8;
     color: white;
+
     font-size: 16px;
+    font-weight: 600;
+
     cursor: pointer;
+
+    transition: all 0.2s ease;
 }
 
+
+/* Button hover animation */
 button:hover {
     background-color: #003f87;
+    transform: translateY(-2px);
 }
 
-/* Error Message */
-#error-message {
-    margin-top: 10px;
-    font-size: 14px;
+
+/* Footer note */
+.footer-note {
+    margin-top: 28px;
+    font-size: 12px;
+    color: #777;
 }

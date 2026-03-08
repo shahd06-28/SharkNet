@@ -8,40 +8,37 @@
 
 <body>
 
+    <img src="../images/nsu.png" class="logo" alt="NSU Logo">
+
     <div class="login-container">
+
         <h1>SharkNet</h1>
-        <h2>NSU Student Login</h2>
+
+        <p class="subtitle">
+            Connect with fellow NSU students to ask questions,
+            share knowledge, and find tutors.
+        </p>
 
         <form action="home.html">
-            
-            <input type="email" 
-                   id="email" 
-                   name="email" 
-                   placeholder="Enter your NSU email" 
-                   required>
+
+            <label for="email">Please enter your NSU email</label>
+
+            <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="example@mynsu.nova.edu"
+                required>
 
             <button type="submit">Login</button>
 
         </form>
 
-        <p id="error-message" style="color:red;"></p>
+        <p class="footer-note">
+            NSU Students Only • Prototype Version
+        </p>
+
     </div>
-
-    <script>
-        const form = document.querySelector("form");
-        const errorMessage = document.getElementById("error-message");
-
-        form.addEventListener("submit", function(event) {
-            const email = document.getElementById("email").value;
-
-            if (!email.toLowerCase().includes("nsu")) {
-                event.preventDefault();
-                errorMessage.textContent = "You must use a valid NSU email.";
-            } else {
-                errorMessage.textContent = "";
-            }
-        });
-    </script>
 
 </body>
 </html>
