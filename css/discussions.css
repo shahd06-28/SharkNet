@@ -1,0 +1,239 @@
+/* Global Section Titles */
+.section-title {
+    font-size: 2rem;
+    color: #0072ce;
+    margin-bottom: 40px; 
+    text-align: center;
+}
+
+/* Top Bar */
+.top-bar {
+    width: 100%;
+    position: relative; 
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    padding: 0 10px;
+}
+
+.top-bar .back-btn {
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 8x 16px;
+    font-size: 1.0rem;
+    border-radius: 5px;
+    border: none;
+    background-color: #0072ce;
+    color: white;
+    cursor: pointer;
+}
+
+/* Layout */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+    padding: 20px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Header */
+header.header {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 40px;
+    background: rgba(0,0,50,0.85);
+    color: white;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* Majors */
+.majors-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+/* Major Cards */
+.major-card {
+    background: white;
+    color: #0072ce;
+    font-weight: bold;
+    font-size: 1.2rem;
+    width: 260px;
+    height: 120px;
+    padding: 20px;
+    text-align: center;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+    border: 2px solid #0072ce;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.major-card:hover {
+    background: #0072ce;
+    color: white;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    transform: translateY(-3px) scale(1.03);
+}
+
+.major-card.coming-soon {
+    border: 2px dashed #aaa;
+    color: #555;
+    background: #f9f9f9;
+    cursor: default;
+    font-style: italic;
+    font-weight: normal;
+}
+
+.major-card.coming-soon:hover {
+    background: #f9f9f9;
+    color: #555;
+    transform: none;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+}
+
+/* Discussion Cards */
+.discussion-section {
+    max-width: 900px;
+    width: 90%;
+    margin: 20px auto 0 auto;
+}
+
+.discussion-section .discussion-card {
+    background: white;
+    padding: 25px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: none;
+    font-size: 1.1rem;
+}
+
+/* Card Header */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.timestamp {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+/* Fins Up Button */
+.fins-up {
+    display: flex;
+    align-items: center;
+    gap: 5px;             
+    font-weight: bold;
+    color: #0072ce;
+    font-size: 0.9rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background-color: #e6f0ff;  
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.fins-up:hover {
+    background-color: #cce0ff;  
+    transform: scale(1.05);
+}
+
+.fin-icon {
+    width: 18px;   
+    height: 18px;
+}
+
+/* Question */
+.question-text {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+/* Reply button */
+.reply-btn {
+    background: #0072ce;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Replies */
+.reply-box {
+    margin-top: 15px;
+}
+
+.existing-replies {
+    margin-bottom: 10px;
+}
+
+.reply {
+    background: #f0f0f0;
+    padding: 8px 10px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+/* Textarea */
+textarea {
+    width: 80%;
+    height: 70px;
+    margin: 10px auto 10px auto;
+    padding: 8px;
+    border-radius: 8px;
+    resize: none;
+    display: block;
+}
+
+/* Post button */
+.post-reply {
+    margin: 10px auto 15px auto;
+    display: block;
+    background: #0072ce;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Hidden */
+.hidden {
+    display: none;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: rgba(0,0,50,0.85);
+    color: white;
+}

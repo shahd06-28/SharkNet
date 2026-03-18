@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SharkNet Discussions</title>
     <link rel="stylesheet" href="../css/homepage.css">
+    <link rel="stylesheet" href="../css/discussions.css">
 </head>
 <body>
+
     <!-- Header -->
     <header class="header">
         <div class="welcome-message">
@@ -20,17 +22,111 @@
         </nav>
     </header>
 
-    <!-- Main content -->
     <main>
-        <section class="featured-section">
-            <h2>Coming Soon: Discussions Feed</h2>
-            <p>This page will display all trending and active discussions for students.</p>
+
+        <!-- Majors Grid -->
+        <section class="majors-section" id="majors-section">
+            <h2 class="section-title">Browse by Major</h2>
+            <div class="majors-grid">
+                <div class="major-card" onclick="location.href='discussions.html?major=Computer+Science'">Computer Science</div>
+                <div class="major-card" onclick="location.href='discussions.html?major=Biology'">Biology</div>
+                <div class="major-card" onclick="location.href='discussions.html?major=Psychology'">Psychology</div>
+                <div class="major-card" onclick="location.href='discussions.html?major=Engineering'">Engineering</div>
+                <div class="major-card" onclick="location.href='discussions.html?major=Business'">Business</div>
+                <div class="major-card" onclick="location.href='discussions.html?major=Nursing'">Nursing</div>
+                <div class="major-card coming-soon">More majors coming soon...</div>
+            </div>
         </section>
+
     </main>
 
-    <!-- Footer -->
     <footer>
         <p>&copy; 2026 SharkNet • Prototype</p>
     </footer>
+
+
+ <!-- Discussions subpage -->
+<script>
+const params = new URLSearchParams(window.location.search);
+const major = params.get("major");
+
+if (major) {
+    const main = document.querySelector('main');
+    document.getElementById("majors-section").style.display = "none";
+
+    // Title and back button
+    const pageTitle = document.createElement("h2");
+    pageTitle.textContent = major + " Discussions";
+    pageTitle.className = "section-title";
+
+    const backBtn = document.createElement("button");
+    backBtn.textContent = "← Back";
+    backBtn.className = "back-btn";
+    backBtn.onclick = () => location.href = 'discussions.html';
+
+    const topBar = document.createElement("div");
+    topBar.className = "top-bar";
+    topBar.appendChild(backBtn);
+    topBar.appendChild(pageTitle);
+
+    main.prepend(topBar);
+
+    const discussionSection = document.createElement("section");
+    discussionSection.className = "discussion-section";
+    main.appendChild(discussionSection);
+
+    // Example discussion template
+    const exampleDiscussion = {
+        title: "This is what an example question would look like.",
+        time: "Just now",
+        replies: [
+            "This is an example reply.",
+            "Another student might respond like this."
+        ]
+    };
+
+    const discussionData = [{ ...exampleDiscussion }];
+
+    discussionData.forEach(d => {
+        const card = document.createElement("div");
+        card.className = "discussion-card";
+
+        card.innerHTML = `
+            <div class="card-header">
+                <span class="timestamp">${d.time}</span>
+                <span class="fins-up">
+                    <img src="../images/fin.png" alt="Shark Fin" class="fin-icon"> 1
+                </span>
+            </div>
+
+            <p class="question-text">${d.title}</p>
+
+            <button class="reply-btn">View Replies</button>
+
+            <div class="reply-box hidden">
+                <div class="existing-replies">
+                    ${d.replies.map(r => `<div class="reply">${r}</div>`).join("")}
+                </div>
+
+                <textarea placeholder="Write a reply..."></textarea>
+                <button class="post-reply">Post Reply</button>
+            </div>
+        `;
+
+        const replyBtn = card.querySelector(".reply-btn");
+        const replyBox = card.querySelector(".reply-box");
+
+        replyBtn.addEventListener("click", () => {
+            replyBox.classList.toggle("hidden");
+            replyBtn.textContent = replyBox.classList.contains("hidden")
+                ? "View Replies"
+                : "Hide Replies";
+        });
+
+        discussionSection.appendChild(card);
+    });
+}
+</script>
+
 </body>
 </html>
