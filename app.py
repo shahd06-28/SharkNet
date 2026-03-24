@@ -1,5 +1,5 @@
 from flask import Flask, send_from_directory, request, redirect, session
-import sqlite3
+import mysql.connector
 
 app = Flask(__name__)
 app.secret_key = "sharknet_secret_key"
@@ -9,8 +9,12 @@ app.secret_key = "sharknet_secret_key"
 # DATABASE CONNECTION
 # -----------------------------
 def get_db():
-    conn = sqlite3.connect("database.db")
-    conn.row_factory = sqlite3.Row
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="kensley.2005.nj@gmail.com",
+        password="Hollowv2005!",
+        database="sharknet"
+    )
     return conn
 
 
@@ -125,14 +129,14 @@ def login_process():
     conn = get_db()
 
     user = conn.execute(
-        "SELECT * FROM users WHERE email=?",
+        "SELECT * FROM USERS WHERE nsu_email = %s",,
         (email,)
     ).fetchone()
 
     if user is None:
 
         conn.execute(
-            "INSERT INTO users (email) VALUES (?)",
+            "INSERT INTO USERS (nsu_email) VALUES (%s)",
             (email,)
         )
 
