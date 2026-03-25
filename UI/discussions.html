@@ -45,16 +45,158 @@
     </footer>
 
 
- <!-- Discussions subpage -->
 <script>
+/*
+========================================================
+DISCUSSIONS PAGE LOGIC
+========================================================
+This script:
+1. Detects which major the user clicked
+2. Loads all discussion posts for that major from the backend
+3. Lets users create new questions
+4. Lets users reply to questions
+5. Lets users reply to replies (nested replies)
+========================================================
+*/
+
 const params = new URLSearchParams(window.location.search);
 const major = params.get("major");
 
+/*
+--------------------------------------------------------
+Helper function:
+Creates a reply form block for either a question reply
+or a nested reply.
+--------------------------------------------------------
+*/
+function createReplyForm({ discussionId, parentReplyId = null, onSuccess }) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "reply-form-wrapper";
+
+    const textarea = document.createElement("textarea");
+    textarea.placeholder = parentReplyId ? "Write a reply to this reply..." : "Write a reply...";
+    textarea.rows = 3;
+
+    const button = document.createElement("button");
+    button.textContent = "Post Reply";
+    button.className = "post-reply";
+
+    button.addEventListener("click", async () => {
+        const replyText = textarea.value.trim();
+
+        if (!replyText) {
+            alert("Please write a reply first.");
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/replies", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    discussion_id: discussionId,
+                    parent_reply_id: parentReplyId,
+                    reply_text: replyText
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.error || "Failed to post reply.");
+                return;
+            }
+
+            textarea.value = "";
+
+            if (onSuccess) {
+                onSuccess();
+            }
+
+        } catch (error) {
+            console.error("Reply error:", error);
+            alert("An error occurred while posting the reply.");
+        }
+    });
+
+    wrapper.appendChild(textarea);
+    wrapper.appendChild(button);
+
+    return wrapper;
+}
+
+
+/*
+--------------------------------------------------------
+Render replies recursively
+This allows "reply to reply" behavior.
+--------------------------------------------------------
+*/
+function renderReplies(replyList, discussionId, reloadDiscussions) {
+    const container = document.createElement("div");
+    container.className = "replies-container";
+
+    replyList.forEach(reply => {
+        const replyCard = document.createElement("div");
+        replyCard.className = "reply";
+
+        replyCard.innerHTML = `
+            <div class="reply-meta">
+                <strong>${reply.author_email}</strong> • ${reply.created_at}
+            </div>
+            <div class="reply-text">${reply.reply_text}</div>
+        `;
+
+        // Button to show nested reply box
+        const replyButton = document.createElement("button");
+        replyButton.textContent = "Reply";
+        replyButton.className = "reply-btn";
+
+        const nestedReplyArea = document.createElement("div");
+        nestedReplyArea.className = "nested-reply-area hidden";
+
+        replyButton.addEventListener("click", () => {
+            nestedReplyArea.classList.toggle("hidden");
+        });
+
+        // Nested reply form
+        const nestedReplyForm = createReplyForm({
+            discussionId: discussionId,
+            parentReplyId: reply.id,
+            onSuccess: reloadDiscussions
+        });
+
+        nestedReplyArea.appendChild(nestedReplyForm);
+
+        replyCard.appendChild(replyButton);
+        replyCard.appendChild(nestedReplyArea);
+
+        // If this reply has child replies, render them inside
+        if (reply.children && reply.children.length > 0) {
+            const childReplies = renderReplies(reply.children, discussionId, reloadDiscussions);
+            childReplies.classList.add("nested-replies");
+            replyCard.appendChild(childReplies);
+        }
+
+        container.appendChild(replyCard);
+    });
+
+    return container;
+}
+
+
+/*
+--------------------------------------------------------
+Main logic for the major-specific discussion view
+--------------------------------------------------------
+*/
 if (major) {
-    const main = document.querySelector('main');
+    const main = document.querySelector("main");
     document.getElementById("majors-section").style.display = "none";
 
-    // Title and back button
+    // Top bar
     const pageTitle = document.createElement("h2");
     pageTitle.textContent = major + " Discussions";
     pageTitle.className = "section-title";
@@ -62,7 +204,7 @@ if (major) {
     const backBtn = document.createElement("button");
     backBtn.textContent = "← Back";
     backBtn.className = "back-btn";
-    backBtn.onclick = () => location.href = 'discussions.html';
+    backBtn.onclick = () => location.href = "discussions.html";
 
     const topBar = document.createElement("div");
     topBar.className = "top-bar";
@@ -71,60 +213,158 @@ if (major) {
 
     main.prepend(topBar);
 
+    // Section where user can create a new question
+    const askQuestionSection = document.createElement("section");
+    askQuestionSection.className = "discussion-section";
+
+    askQuestionSection.innerHTML = `
+        <div class="discussion-card">
+            <h3>Ask a Question</h3>
+            <textarea id="new-question-text" placeholder="Ask something for ${major}..." rows="4"></textarea>
+            <button id="post-question-btn">Post Question</button>
+        </div>
+    `;
+
+    main.appendChild(askQuestionSection);
+
+    // Section where discussion cards will be displayed
     const discussionSection = document.createElement("section");
     discussionSection.className = "discussion-section";
     main.appendChild(discussionSection);
 
-    // Example discussion template
-    const exampleDiscussion = {
-        title: "This is what an example question would look like.",
-        time: "Just now",
-        replies: [
-            "This is an example reply.",
-            "Another student might respond like this."
-        ]
-    };
 
-    const discussionData = [{ ...exampleDiscussion }];
+    /*
+    --------------------------------------------------------
+    Function to load discussions from backend API
+    --------------------------------------------------------
+    */
+    async function loadDiscussions() {
+        discussionSection.innerHTML = "";
 
-    discussionData.forEach(d => {
-        const card = document.createElement("div");
-        card.className = "discussion-card";
+        try {
+            const response = await fetch(`/api/discussions?major=${encodeURIComponent(major)}`);
+            const discussions = await response.json();
 
-        card.innerHTML = `
-            <div class="card-header">
-                <span class="timestamp">${d.time}</span>
-                <span class="fins-up">
-                    <img src="../images/fin.png" alt="Shark Fin" class="fin-icon"> 1
-                </span>
-            </div>
+            if (!response.ok) {
+                alert(discussions.error || "Failed to load discussions.");
+                return;
+            }
 
-            <p class="question-text">${d.title}</p>
+            // If there are no posts yet, show a small message
+            if (discussions.length === 0) {
+                const emptyMessage = document.createElement("div");
+                emptyMessage.className = "discussion-card";
+                emptyMessage.innerHTML = `<p>No discussions yet for ${major}. Be the first to ask a question.</p>`;
+                discussionSection.appendChild(emptyMessage);
+                return;
+            }
 
-            <button class="reply-btn">View Replies</button>
+            discussions.forEach(d => {
+                const card = document.createElement("div");
+                card.className = "discussion-card";
 
-            <div class="reply-box hidden">
-                <div class="existing-replies">
-                    ${d.replies.map(r => `<div class="reply">${r}</div>`).join("")}
-                </div>
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span class="timestamp">${d.created_at}</span>
+                        <span class="fins-up">${d.fins_up}</span>
+                    </div>
 
-                <textarea placeholder="Write a reply..."></textarea>
-                <button class="post-reply">Post Reply</button>
-            </div>
-        `;
+                    <p class="question-text">${d.question}</p>
+                    <p><strong>Posted by:</strong> ${d.author_email}</p>
+                `;
 
-        const replyBtn = card.querySelector(".reply-btn");
-        const replyBox = card.querySelector(".reply-box");
+                // Toggle replies button
+                const replyBtn = document.createElement("button");
+                replyBtn.className = "reply-btn";
+                replyBtn.textContent = "View Replies";
 
-        replyBtn.addEventListener("click", () => {
-            replyBox.classList.toggle("hidden");
-            replyBtn.textContent = replyBox.classList.contains("hidden")
-                ? "View Replies"
-                : "Hide Replies";
-        });
+                // Hidden reply box
+                const replyBox = document.createElement("div");
+                replyBox.className = "reply-box hidden";
 
-        discussionSection.appendChild(card);
+                replyBtn.addEventListener("click", () => {
+                    replyBox.classList.toggle("hidden");
+                    replyBtn.textContent = replyBox.classList.contains("hidden")
+                        ? "View Replies"
+                        : "Hide Replies";
+                });
+
+                // Existing replies
+                const existingReplies = document.createElement("div");
+                existingReplies.className = "existing-replies";
+
+                if (d.replies && d.replies.length > 0) {
+                    existingReplies.appendChild(renderReplies(d.replies, d.id, loadDiscussions));
+                } else {
+                    existingReplies.innerHTML = "<p>No replies yet.</p>";
+                }
+
+                // Reply form for replying directly to the question
+                const directReplyForm = createReplyForm({
+                    discussionId: d.id,
+                    parentReplyId: null,
+                    onSuccess: loadDiscussions
+                });
+
+                replyBox.appendChild(existingReplies);
+                replyBox.appendChild(directReplyForm);
+
+                card.appendChild(replyBtn);
+                card.appendChild(replyBox);
+
+                discussionSection.appendChild(card);
+            });
+
+        } catch (error) {
+            console.error("Load discussions error:", error);
+            alert("An error occurred while loading discussions.");
+        }
+    }
+
+
+    /*
+    --------------------------------------------------------
+    Create a new discussion question
+    --------------------------------------------------------
+    */
+    document.getElementById("post-question-btn").addEventListener("click", async () => {
+        const questionText = document.getElementById("new-question-text").value.trim();
+
+        if (!questionText) {
+            alert("Please write a question first.");
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/discussions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    major: major,
+                    question: questionText
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.error || "Failed to create discussion.");
+                return;
+            }
+
+            document.getElementById("new-question-text").value = "";
+            loadDiscussions();
+
+        } catch (error) {
+            console.error("Create discussion error:", error);
+            alert("An error occurred while creating the discussion.");
+        }
     });
+
+    // Initial page load for discussions
+    loadDiscussions();
 }
 </script>
 
