@@ -11,8 +11,8 @@ app.secret_key = "sharknet_secret_key"
 def get_db():
     conn = mysql.connector.connect(
         host="localhost",
-        user="kensley.2005.nj@gmail.com",
-        password="Hollowv2005!",
+        user="root",
+        password="",
         database="sharknet"
     )
     return conn
