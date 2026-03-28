@@ -1,0 +1,145 @@
+/* Section title */
+.section-title {
+    font-size: 1.8rem;
+    color: #0072ce;
+    text-align: center;
+    margin: 25px 0;
+}
+
+/* Tutor list container */
+.tutor-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 85%;
+    margin: 0 auto 25px auto;
+}
+
+/* Individual tutor card */
+.tutor-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    padding: 15px 20px 20px 20px;
+    width: 100%;
+    max-width: 650px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Top header: Name + Rating */
+.tutor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tutor-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #0072ce;
+}
+
+.rating {
+    font-weight: bold;
+    color: #ff9800;
+    font-size: 1rem;
+}
+
+/* Year and Major next to each other */
+.tutor-year-major {
+    display: flex;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: 4px;
+}
+
+/* Bio/Description */
+.bio {
+    font-size: 0.95rem;
+    margin: 8px 0 10px 0;
+}
+
+/* Buttons container */
+.card-buttons {
+    display: flex;
+    justify-content: space-between; /* left = review, right = book */
+    margin-top: 10px;
+}
+
+/* Review toggle button */
+.review-toggle {
+    background: #0072ce;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.review-toggle:hover {
+    background: #005bb5;
+}
+
+/* Book session button on bottom-right */
+.book-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    cursor: pointer;
+}
+
+.book-btn:hover {
+    background: #218838;
+}
+
+/* Review box */
+.review-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.existing-reviews .review {
+    background: #f0f0f0;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.review-box textarea {
+    width: 90%;
+    height: 60px;
+    padding: 8px;
+    border-radius: 8px;
+    resize: none;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Post review button centralized */
+.post-review {
+    display: block;
+    margin: 5px auto 10px auto;
+    background: #0072ce;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    cursor: pointer;
+}
+
+.post-review:hover {
+    background: #005bb5;
+}
+
+/* Hidden class */
+.hidden {
+    display: none;
+}

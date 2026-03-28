@@ -5,32 +5,237 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SharkNet Tutors</title>
     <link rel="stylesheet" href="../css/homepage.css">
+    <link rel="stylesheet" href="../css/tutors.css">
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="welcome-message">
-            <h1>SharkNet Tutors</h1>
-            <p>Find a tutor and book a session.</p>
+
+<header class="header">
+    <div class="welcome-message">
+        <h1>SharkNet Tutors</h1>
+        <p>Browse tutors by major, see reviews, and book sessions.</p>
+    </div>
+    <nav class="nav-buttons">
+        <button onclick="location.href='home.html'">Home</button>
+        <button onclick="location.href='discussions.html'">Discussions</button>
+        <button onclick="location.href='tutors.html'">Tutors</button>
+    </nav>
+</header>
+
+<main>
+
+    <!-- Computer Science -->
+    <h2 class="section-title">Computer Science</h2>
+    <section class="tutor-list">
+        <!-- Jane Doe -->
+        <div class="tutor-card">
+            <div class="tutor-header">
+                <span class="tutor-name">Jane Doe</span>
+                <span class="rating">⭐ 4.9</span>
+            </div>
+            <div class="tutor-year-major">
+                <span class="tutor-year">Senior</span>
+                <span class="tutor-major">CS Major</span>
+            </div>
+            <p class="bio">Helps students understand algorithms, data structures, and programming concepts.</p>
+            <div class="card-buttons">
+                <button class="review-toggle">View Reviews</button>
+                <button class="book-btn">Book Session</button>
+            </div>
+            <div class="review-box hidden">
+                <div class="existing-reviews">
+                    <div class="review">"Super clear explanations!"</div>
+                    <div class="review">"Helped me debug my projects."</div>
+                </div>
+                <textarea placeholder="Write a review..."></textarea>
+                <button class="post-review">Post Review</button>
+            </div>
         </div>
-        <nav class="nav-buttons">
-            <button onclick="location.href='home.html'">Home</button>
-            <button onclick="location.href='discussions.html'">Discussions</button>
-            <button onclick="location.href='tutors.html'">Tutors</button>
-        </nav>
-    </header>
 
-    <!-- Main content -->
-    <main>
-        <section class="featured-section">
-            <h2>Coming Soon: Tutors List</h2>
-            <p>This page will display available tutors and allow students to book sessions.</p>
-        </section>
-    </main>
+        <!-- Alice Nguyen -->
+        <div class="tutor-card">
+            <div class="tutor-header">
+                <span class="tutor-name">Alice Nguyen</span>
+                <span class="rating">⭐ 4.7</span>
+            </div>
+            <div class="tutor-year-major">
+                <span class="tutor-year">Junior</span>
+                <span class="tutor-major">CS Major</span>
+            </div>
+            <p class="bio">Experienced in web apps and database management. Great for projects and homework help.</p>
+            <div class="card-buttons">
+                <button class="review-toggle">View Reviews</button>
+                <button class="book-btn">Book Session</button>
+            </div>
+            <div class="review-box hidden">
+                <div class="existing-reviews">
+                    <div class="review">"Helped me understand SQL queries."</div>
+                    <div class="review">"Super friendly and patient."</div>
+                </div>
+                <textarea placeholder="Write a review..."></textarea>
+                <button class="post-review">Post Review</button>
+            </div>
+        </div>
+    </section>
 
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2026 SharkNet • Prototype</p>
-    </footer>
+    <!-- Biology -->
+    <h2 class="section-title">Biology</h2>
+    <section class="tutor-list">
+        <div class="tutor-card">
+            <div class="tutor-header">
+                <span class="tutor-name">Michael Brown</span>
+                <span class="rating">⭐ 4.8</span>
+            </div>
+            <div class="tutor-year-major">
+                <span class="tutor-year">Sophomore</span>
+                <span class="tutor-major">Biology Major</span>
+            </div>
+            <p class="bio">Covers general biology, microbiology, and lab techniques for beginners.</p>
+            <div class="card-buttons">
+                <button class="review-toggle">View Reviews</button>
+                <button class="book-btn">Book Session</button>
+            </div>
+            <div class="review-box hidden">
+                <div class="existing-reviews">
+                    <div class="review">"Explains concepts in a really understandable way."</div>
+                    <div class="review">"Great study tips for exams!"</div>
+                </div>
+                <textarea placeholder="Write a review..."></textarea>
+                <button class="post-review">Post Review</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Psychology -->
+    <h2 class="section-title">Psychology</h2>
+    <section class="tutor-list">
+        <div class="tutor-card">
+            <div class="tutor-header">
+                <span class="tutor-name">Emily Lee</span>
+                <span class="rating">⭐ 4.9</span>
+            </div>
+            <div class="tutor-year-major">
+                <span class="tutor-year">Senior</span>
+                <span class="tutor-major">Psychology Major</span>
+            </div>
+            <p class="bio">Specializes in research methods, statistics, and essay writing guidance.</p>
+            <div class="card-buttons">
+                <button class="review-toggle">View Reviews</button>
+                <button class="book-btn">Book Session</button>
+            </div>
+            <div class="review-box hidden">
+                <div class="existing-reviews">
+                    <div class="review">"Helped me improve my research paper."</div>
+                    <div class="review">"Very knowledgeable and patient."</div>
+                </div>
+                <textarea placeholder="Write a review..."></textarea>
+                <button class="post-review">Post Review</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Engineering -->
+    <h2 class="section-title">Engineering</h2>
+    <section class="tutor-list">
+        <div class="tutor-card">
+            <div class="tutor-header">
+                <span class="tutor-name">John Smith</span>
+                <span class="rating">⭐ 4.8</span>
+            </div>
+            <div class="tutor-year-major">
+                <span class="tutor-year">Senior</span>
+                <span class="tutor-major">Engineering Major</span>
+            </div>
+            <p class="bio">Specializes in mechanics, thermodynamics, and problem-solving for projects.</p>
+            <div class="card-buttons">
+                <button class="review-toggle">View Reviews</button>
+                <button class="book-btn">Book Session</button>
+            </div>
+            <div class="review-box hidden">
+                <div class="existing-reviews">
+                    <div class="review">"Great explanations for complex engineering topics."</div>
+                    <div class="review">"Helped me understand lab experiments."</div>
+                </div>
+                <textarea placeholder="Write a review..."></textarea>
+                <button class="post-review">Post Review</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Business -->
+    <h2 class="section-title">Business</h2>
+    <section class="tutor-list">
+        <div class="tutor-card">
+            <div class="tutor-header">
+                <span class="tutor-name">Samantha Green</span>
+                <span class="rating">⭐ 4.7</span>
+            </div>
+            <div class="tutor-year-major">
+                <span class="tutor-year">Junior</span>
+                <span class="tutor-major">Business Major</span>
+            </div>
+            <p class="bio">Focuses on finance, marketing, and business strategy for projects and exams.</p>
+            <div class="card-buttons">
+                <button class="review-toggle">View Reviews</button>
+                <button class="book-btn">Book Session</button>
+            </div>
+            <div class="review-box hidden">
+                <div class="existing-reviews">
+                    <div class="review">"Explains finance concepts clearly."</div>
+                    <div class="review">"Helped me with my marketing assignment."</div>
+                </div>
+                <textarea placeholder="Write a review..."></textarea>
+                <button class="post-review">Post Review</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Nursing -->
+    <h2 class="section-title">Nursing</h2>
+    <section class="tutor-list">
+        <div class="tutor-card">
+            <div class="tutor-header">
+                <span class="tutor-name">David Wilson</span>
+                <span class="rating">⭐ 4.8</span>
+            </div>
+            <div class="tutor-year-major">
+                <span class="tutor-year">Senior</span>
+                <span class="tutor-major">Nursing Major</span>
+            </div>
+            <p class="bio">Provides guidance on anatomy, physiology, and clinical skills practice.</p>
+            <div class="card-buttons">
+                <button class="review-toggle">View Reviews</button>
+                <button class="book-btn">Book Session</button>
+            </div>
+            <div class="review-box hidden">
+                <div class="existing-reviews">
+                    <div class="review">"Very patient and thorough explanations."</div>
+                    <div class="review">"Helped me prepare for exams effectively."</div>
+                </div>
+                <textarea placeholder="Write a review..."></textarea>
+                <button class="post-review">Post Review</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- More Majors Coming Soon -->
+    <h2 class="section-title" style="text-align: center; margin-top: 40px;">More Majors Coming Soon...</h2>
+
+</main>
+
+<footer>
+    <p>&copy; 2026 SharkNet • Prototype</p>
+</footer>
+
+<script>
+// Toggle reviews
+document.querySelectorAll(".review-toggle").forEach(button => {
+    button.addEventListener("click", () => {
+        const reviewBox = button.closest(".tutor-card").querySelector(".review-box");
+        reviewBox.classList.toggle("hidden");
+        button.textContent = reviewBox.classList.contains("hidden") ? "View Reviews" : "Hide Reviews";
+    });
+});
+</script>
+
 </body>
 </html>
