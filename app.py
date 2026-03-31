@@ -81,7 +81,7 @@ def login_process():
     conn = get_db()
 
     user = conn.execute(
-        "SELECT * FROM USERS WHERE nsu_email = %s",,
+        "SELECT * FROM USERS WHERE nsu_email = %s",
         (email,)
     ).fetchone()
 
