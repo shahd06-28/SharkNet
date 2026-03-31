@@ -78,6 +78,22 @@ def login_process():
     if not email.endswith("@mynsu.nova.edu"):
         return "Only NSU student emails allowed"
 
+    conn = get_db()
+
+    user = conn.execute(
+        "SELECT * FROM USERS WHERE nsu_email = %s",,
+        (email,)
+    ).fetchone()
+
+    if user is None:
+
+        conn.execute(
+            "INSERT INTO USERS (nsu_email) VALUES (%s)",
+            (email,)
+        )
+
+        conn.commit()
+
     session["user"] = email
 
     print("LOGIN:", email)
