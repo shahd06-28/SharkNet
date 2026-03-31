@@ -51,8 +51,21 @@
                     "children": []
                 }
             ]
+        },
+        {
+            "id": 3,
+            "major": "Computer Science",
+            "title": "Hey how are ya",
+            "time": "Just now",
+            "fins_up": 1,
+            "replies": [
+                {
+                    "id": 5,
+                    "reply_text": "Heyy"
+                }
+            ]
         }
     ],
-    "next_discussion_id": 3,
-    "next_reply_id": 5
+    "next_discussion_id": 4,
+    "next_reply_id": 6
 }
