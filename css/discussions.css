@@ -127,7 +127,6 @@ header.header {
     margin-bottom: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    transition: none;
     font-size: 1.1rem;
 }
 
@@ -143,28 +142,28 @@ header.header {
     opacity: 0.7;
 }
 
-/* Fins Up Button */
+/* Fins */
 .fins-up {
     display: flex;
     align-items: center;
-    gap: 5px;             
+    gap: 5px;
     font-weight: bold;
     color: #0072ce;
     font-size: 0.9rem;
     padding: 4px 8px;
     border-radius: 6px;
-    background-color: #e6f0ff;  
+    background-color: #e6f0ff;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .fins-up:hover {
-    background-color: #cce0ff;  
+    background-color: #cce0ff;
     transform: scale(1.05);
 }
 
 .fin-icon {
-    width: 18px;   
+    width: 18px;
     height: 18px;
 }
 
@@ -175,7 +174,15 @@ header.header {
     margin: 10px 0;
 }
 
-/* Reply button */
+/* Actions Row */
+.card-actions-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+}
+
+/* Buttons */
 .reply-btn {
     background: #0072ce;
     color: white;
@@ -185,16 +192,33 @@ header.header {
     cursor: pointer;
 }
 
+.delete-btn {
+    background-color: #ffe6e6;
+    color: #cc0000;
+    border: none;
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+    background-color: #cc0000;
+    color: white;
+    transform: scale(1.05);
+}
+
 /* Replies */
 .reply-box {
     margin-top: 15px;
 }
 
-.existing-replies {
-    margin-bottom: 10px;
-}
-
+/* Each reply */
 .reply {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     background: #f0f0f0;
     padding: 8px 10px;
     border-radius: 8px;
@@ -202,11 +226,31 @@ header.header {
     font-size: 0.9rem;
 }
 
+.reply-text {
+    flex: 1;
+}
+
+.delete-reply-btn {
+    background-color: transparent;
+    color: #cc0000;
+    border: none;
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 5px;
+    transition: all 0.2s ease;
+}
+
+.delete-reply-btn:hover {
+    background-color: #cc0000;
+    color: white;
+}
+
 /* Textarea */
 textarea {
     width: 80%;
     height: 70px;
-    margin: 10px auto 10px auto;
+    margin: 10px auto;
     padding: 8px;
     border-radius: 8px;
     resize: none;

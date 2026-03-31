@@ -44,8 +44,6 @@
         <p>&copy; 2026 SharkNet • Prototype</p>
     </footer>
 
-
- <!-- Discussions subpage -->
 <script>
 const params = new URLSearchParams(window.location.search);
 const major = params.get("major");
@@ -54,7 +52,6 @@ if (major) {
     const main = document.querySelector('main');
     document.getElementById("majors-section").style.display = "none";
 
-    // Title and back button
     const pageTitle = document.createElement("h2");
     pageTitle.textContent = major + " Discussions";
     pageTitle.className = "section-title";
@@ -75,7 +72,6 @@ if (major) {
     discussionSection.className = "discussion-section";
     main.appendChild(discussionSection);
 
-    // Example discussion template
     const exampleDiscussion = {
         title: "This is what an example question would look like.",
         time: "Just now",
@@ -101,11 +97,19 @@ if (major) {
 
             <p class="question-text">${d.title}</p>
 
-            <button class="reply-btn">View Replies</button>
+            <div class="card-actions-row">
+                <button class="reply-btn">View Replies</button>
+                <button class="delete-btn">Delete Post</button>
+            </div>
 
             <div class="reply-box hidden">
                 <div class="existing-replies">
-                    ${d.replies.map(r => `<div class="reply">${r}</div>`).join("")}
+                    ${d.replies.map(r => `
+                        <div class="reply">
+                            <span class="reply-text">${r}</span>
+                            <button class="delete-reply-btn">Delete Reply</button>
+                        </div>
+                    `).join("")}
                 </div>
 
                 <textarea placeholder="Write a reply..."></textarea>

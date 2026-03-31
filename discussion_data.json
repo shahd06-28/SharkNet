@@ -31,6 +31,10 @@
                     "created_at": "Just now",
                     "fins_up": 0,
                     "children": []
+                },
+                {
+                    "id": 6,
+                    "reply_text": "hey girllllll"
                 }
             ]
         },
@@ -62,10 +66,18 @@
                 {
                     "id": 5,
                     "reply_text": "Heyy"
+                },
+                {
+                    "id": 7,
+                    "reply_text": "Heyyyy"
+                },
+                {
+                    "id": 8,
+                    "reply_text": "Test"
                 }
             ]
         }
     ],
     "next_discussion_id": 4,
-    "next_reply_id": 6
+    "next_reply_id": 9
 }
