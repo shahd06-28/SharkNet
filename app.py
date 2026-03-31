@@ -5,10 +5,9 @@ app.secret_key = "sharknet_secret_key"
 
 
 # --------------------------------------------------
-# TEMP DATA STORAGE (STARTS EMPTY)
+# TEMP DATA STORAGE
 # --------------------------------------------------
 discussions_data = []
-
 next_discussion_id = 1
 next_reply_id = 1
 
@@ -72,32 +71,15 @@ def image_files(filename):
 # --------------------------------------------------
 @app.route("/login", methods=["POST"])
 def login_process():
+    email = request.form.get("email", "").strip().lower()
 
-    email = request.form["email"].strip().lower()
+    if not email:
+        return "Email is required", 400
 
     if not email.endswith("@mynsu.nova.edu"):
-        return "Only NSU student emails allowed"
-
-    conn = get_db()
-
-    user = conn.execute(
-        "SELECT * FROM USERS WHERE nsu_email = %s",
-        (email,)
-    ).fetchone()
-
-    if user is None:
-
-        conn.execute(
-            "INSERT INTO USERS (nsu_email) VALUES (%s)",
-            (email,)
-        )
-
-        conn.commit()
+        return "Only NSU student emails allowed", 400
 
     session["user"] = email
-
-    print("LOGIN:", email)
-
     return redirect("/home.html")
 
 
@@ -115,7 +97,6 @@ def logout():
 # --------------------------------------------------
 @app.route("/api/discussions", methods=["GET"])
 def get_discussions():
-
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
@@ -125,8 +106,7 @@ def get_discussions():
         return jsonify({"error": "Major is required"}), 400
 
     filtered = [d for d in discussions_data if d["major"] == major]
-
-    return jsonify(filtered)
+    return jsonify(filtered), 200
 
 
 # --------------------------------------------------
@@ -134,7 +114,6 @@ def get_discussions():
 # --------------------------------------------------
 @app.route("/api/discussions", methods=["POST"])
 def create_discussion():
-
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
@@ -149,26 +128,23 @@ def create_discussion():
         "id": next_discussion_id,
         "major": data["major"],
         "question": data["question"],
-        "author": session["user"],
+        "author_email": session["user"],
+        "created_at": "Just now",
         "fins_up": 0,
         "replies": []
     }
 
     discussions_data.append(new_discussion)
-
-    print("NEW DISCUSSION:", new_discussion)
-
     next_discussion_id += 1
 
     return jsonify(new_discussion), 201
 
 
 # --------------------------------------------------
-# CREATE REPLY (supports nested replies)
+# CREATE REPLY (SUPPORTS NESTED REPLIES)
 # --------------------------------------------------
 @app.route("/api/replies", methods=["POST"])
 def create_reply():
-
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
@@ -185,16 +161,15 @@ def create_reply():
     new_reply = {
         "id": next_reply_id,
         "reply_text": data["reply_text"],
-        "author": session["user"],
+        "author_email": session["user"],
+        "created_at": "Just now",
         "children": []
     }
 
     for discussion in discussions_data:
         if discussion["id"] == discussion_id:
-
             if parent_reply_id is None:
                 discussion["replies"].append(new_reply)
-
             else:
                 def add_to_parent(reply_list):
                     for reply in reply_list:
@@ -210,10 +185,7 @@ def create_reply():
                 if not added:
                     return jsonify({"error": "Parent reply not found"}), 404
 
-            print("NEW REPLY:", new_reply)
-
             next_reply_id += 1
-
             return jsonify(new_reply), 201
 
     return jsonify({"error": "Discussion not found"}), 404
@@ -224,7 +196,6 @@ def create_reply():
 # --------------------------------------------------
 @app.route("/api/fins_up", methods=["POST"])
 def fins_up():
-
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
@@ -238,9 +209,6 @@ def fins_up():
     for discussion in discussions_data:
         if discussion["id"] == discussion_id:
             discussion["fins_up"] += 1
-
-            print("FINS UP:", discussion_id, discussion["fins_up"])
-
             return jsonify({
                 "discussion_id": discussion_id,
                 "fins_up": discussion["fins_up"]
@@ -250,7 +218,7 @@ def fins_up():
 
 
 # --------------------------------------------------
-# SERVER START
+# START SERVER
 # --------------------------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
