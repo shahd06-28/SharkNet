@@ -2,46 +2,20 @@ from flask import Flask, send_from_directory, request, redirect, session, jsonif
 import os
 import json
 import re
+import sqlite3
 
 app = Flask(__name__)
 app.secret_key = "sharknet_secret_key"
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UI_DIR = os.path.join(BASE_DIR, "UI")
-DATA_FILE = os.path.join(BASE_DIR, "discussion_data.json")
 
-# --------------------------------------------------
-# DATA STORAGE
-# --------------------------------------------------
-discussions_data = []
-next_discussion_id = 1
-next_reply_id = 1
+DB = os.path.join(BASE_DIR, "sharknet.db")
 
-
-def save_data():
-    data = {
-        "discussions_data": discussions_data,
-        "next_discussion_id": next_discussion_id,
-        "next_reply_id": next_reply_id
-    }
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
-
-
-def load_data():
-    global discussions_data, next_discussion_id, next_reply_id
-
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            discussions_data = data.get("discussions_data", [])
-            next_discussion_id = data.get("next_discussion_id", 1)
-            next_reply_id = data.get("next_reply_id", 1)
-    else:
-        discussions_data = []
-        next_discussion_id = 1
-        next_reply_id = 1
-
+def get_db():
+    conn = sqlite3.connect(DB)
+    conn.row_factory = sqlite3.Row  # lets you access columns by name
+    return conn
 
 # --------------------------------------------------
 # RUNTIME SCRIPT INJECTION FOR ORIGINAL discussions.html
@@ -369,43 +343,53 @@ def get_discussions():
         return jsonify({"error": "Unauthorized"}), 401
 
     major = request.args.get("major")
-
     if not major:
         return jsonify({"error": "Major is required"}), 400
 
-    filtered = [d for d in discussions_data if d["major"] == major]
-    return jsonify(filtered), 200
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT * FROM discussions WHERE major = ? ORDER BY created_at DESC",
+        (major,)
+    ).fetchall()
 
+    result = []
+    for row in rows:
+        d = dict(row)
+        replies = conn.execute(
+            "SELECT * FROM replies WHERE discussion_id = ?", (d["id"],)
+        ).fetchall()
+        d["replies"] = [dict(r) for r in replies]
+        d["time"] = d["created_at"]  # so the frontend still works
+        result.append(d)
+
+    conn.close()
+    return jsonify(result), 200
 
 # --------------------------------------------------
 # CREATE DISCUSSION
 # --------------------------------------------------
 @app.route("/api/discussions", methods=["POST"])
 def create_discussion():
-    global next_discussion_id
-
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     data = request.get_json()
-
     if not data or not data.get("major") or not data.get("question"):
         return jsonify({"error": "Missing data"}), 400
 
-    new_discussion = {
-        "id": next_discussion_id,
-        "major": data["major"],
-        "title": data["question"],
-        "time": "Just now",
-        "fins_up": 1,
-        "replies": []
-    }
+    conn = get_db()
+    # save the student email if we haven't seen them before
+    conn.execute("INSERT OR IGNORE INTO students (email) VALUES (?)", (session["user"],))
+    cur = conn.execute(
+        "INSERT INTO discussions (major, title, author_email, fins_up) VALUES (?, ?, ?, 0)",
+        (data["major"], data["question"], session["user"])
+    )
+    conn.commit()
 
-    discussions_data.append(new_discussion)
-    next_discussion_id += 1
-    save_data()
+    new_id = cur.lastrowid
+    conn.close()
 
-    return jsonify(new_discussion), 201
+    return jsonify({"id": new_id, "title": data["question"], "time": "Just now", "fins_up": 0, "replies": []}), 201
 
 
 # --------------------------------------------------
@@ -413,36 +397,26 @@ def create_discussion():
 # --------------------------------------------------
 @app.route("/api/replies", methods=["POST"])
 def create_reply():
-    global next_reply_id
-
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     data = request.get_json()
-
     if not data or not data.get("discussion_id") or not data.get("reply_text"):
         return jsonify({"error": "Missing data"}), 400
 
-    discussion_id = data["discussion_id"]
+    conn = get_db()
+    cur = conn.execute(
+        "INSERT INTO replies (discussion_id, reply_text, author_email) VALUES (?, ?, ?)",
+        (data["discussion_id"], data["reply_text"], session["user"])
+    )
+    conn.commit()
+    conn.close()
 
-    new_reply = {
-        "id": next_reply_id,
-        "reply_text": data["reply_text"]
-    }
-
-    for discussion in discussions_data:
-        if discussion["id"] == discussion_id:
-            discussion["replies"].append(new_reply)
-            next_reply_id += 1
-            save_data()
-            return jsonify(new_reply), 201
-
-    return jsonify({"error": "Discussion not found"}), 404
+    return jsonify({"id": cur.lastrowid, "reply_text": data["reply_text"]}), 201
 
 
 # --------------------------------------------------
 # START SERVER
 # --------------------------------------------------
 if __name__ == "__main__":
-    load_data()
     app.run(host="0.0.0.0", port=5000, debug=True)
