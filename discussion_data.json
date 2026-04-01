@@ -1,66 +1,6 @@
 {
     "discussions_data": [
         {
-            "id": 1,
-            "major": "Computer Science",
-            "question": "Hello",
-            "author_email": "sd2383@mynsu.nova.edu",
-            "created_at": "Just now",
-            "fins_up": 0,
-            "replies": [
-                {
-                    "id": 1,
-                    "reply_text": "Whats up",
-                    "author_email": "sd2383@mynsu.nova.edu",
-                    "created_at": "Just now",
-                    "fins_up": 0,
-                    "children": []
-                },
-                {
-                    "id": 2,
-                    "reply_text": "hi",
-                    "author_email": "sd2383@mynsu.nova.edu",
-                    "created_at": "Just now",
-                    "fins_up": 0,
-                    "children": []
-                },
-                {
-                    "id": 3,
-                    "reply_text": "Hello",
-                    "author_email": "sd2383@mynsu.nova.edu",
-                    "created_at": "Just now",
-                    "fins_up": 0,
-                    "children": []
-                },
-                {
-                    "id": 6,
-                    "reply_text": "hey girllllll"
-                },
-                {
-                    "id": 9,
-                    "reply_text": "hello"
-                }
-            ]
-        },
-        {
-            "id": 2,
-            "major": "Computer Science",
-            "question": "Testing",
-            "author_email": "sd2383@mynsu.nova.edu",
-            "created_at": "Just now",
-            "fins_up": 0,
-            "replies": [
-                {
-                    "id": 4,
-                    "reply_text": "Hey there test test",
-                    "author_email": "sd2383@mynsu.nova.edu",
-                    "created_at": "Just now",
-                    "fins_up": 0,
-                    "children": []
-                }
-            ]
-        },
-        {
             "id": 3,
             "major": "Computer Science",
             "title": "Hey how are ya",
@@ -69,16 +9,35 @@
             "replies": [
                 {
                     "id": 5,
-                    "reply_text": "Heyy"
+                    "reply_text": "Heyy",
+                    "author_email": "",
+                    "liked_by": [
+                        "sd2383@mynsu.nova.edu"
+                    ],
+                    "fins_up": 1
                 },
                 {
                     "id": 7,
-                    "reply_text": "Heyyyy"
+                    "reply_text": "Heyyyy",
+                    "author_email": "",
+                    "liked_by": [
+                        "sd2383@mynsu.nova.edu"
+                    ],
+                    "fins_up": 1
                 },
                 {
                     "id": 8,
-                    "reply_text": "Test"
+                    "reply_text": "Test",
+                    "author_email": "",
+                    "liked_by": [
+                        "sd2383@mynsu.nova.edu"
+                    ],
+                    "fins_up": 1
                 }
+            ],
+            "author_email": "",
+            "liked_by": [
+                "sd2383@mynsu.nova.edu"
             ]
         },
         {
@@ -87,9 +46,132 @@
             "title": "hi test",
             "time": "Just now",
             "fins_up": 1,
-            "replies": []
+            "replies": [],
+            "author_email": "",
+            "liked_by": [
+                "sd2383@mynsu.nova.edu"
+            ]
         }
     ],
-    "next_discussion_id": 5,
-    "next_reply_id": 10
+    "next_discussion_id": 6,
+    "next_reply_id": 11,
+    "tutor_reviews": {
+        "Jane Doe": [
+            {
+                "id": 1,
+                "review_text": "Super clear explanations!",
+                "author_email": "",
+                "time": "Just now"
+            },
+            {
+                "id": 2,
+                "review_text": "Helped me debug my projects.",
+                "author_email": "",
+                "time": "Just now"
+            },
+            {
+                "id": 15,
+                "review_text": "Amazing tutor! Highly recommend",
+                "author_email": "sd2383@mynsu.nova.edu",
+                "time": "Just now"
+            },
+            {
+                "id": 16,
+                "review_text": "100 stars great tutor",
+                "author_email": "sd2383@mynsu.nova.edu",
+                "time": "Just now"
+            },
+            {
+                "id": 17,
+                "review_text": "hii",
+                "author_email": "sd2383@mynsu.nova.edu",
+                "time": "Just now"
+            }
+        ],
+        "Alice Susan": [
+            {
+                "id": 3,
+                "review_text": "Helped me understand SQL queries.",
+                "author_email": "",
+                "time": "Just now"
+            },
+            {
+                "id": 4,
+                "review_text": "Super friendly and patient.",
+                "author_email": "",
+                "time": "Just now"
+            }
+        ],
+        "Michael Brown": [
+            {
+                "id": 5,
+                "review_text": "Explains concepts in a really understandable way.",
+                "author_email": "",
+                "time": "Just now"
+            },
+            {
+                "id": 6,
+                "review_text": "Great study tips for exams!",
+                "author_email": "",
+                "time": "Just now"
+            }
+        ],
+        "Emily Lee": [
+            {
+                "id": 7,
+                "review_text": "Helped me improve my research paper.",
+                "author_email": "",
+                "time": "Just now"
+            },
+            {
+                "id": 8,
+                "review_text": "Very knowledgeable and patient.",
+                "author_email": "",
+                "time": "Just now"
+            }
+        ],
+        "John Smith": [
+            {
+                "id": 9,
+                "review_text": "Great explanations for complex engineering topics.",
+                "author_email": "",
+                "time": "Just now"
+            },
+            {
+                "id": 10,
+                "review_text": "Helped me understand lab experiments.",
+                "author_email": "",
+                "time": "Just now"
+            }
+        ],
+        "Samantha Green": [
+            {
+                "id": 11,
+                "review_text": "Explains finance concepts clearly.",
+                "author_email": "",
+                "time": "Just now"
+            },
+            {
+                "id": 12,
+                "review_text": "Helped me with my marketing assignment.",
+                "author_email": "",
+                "time": "Just now"
+            }
+        ],
+        "David Wilson": [
+            {
+                "id": 13,
+                "review_text": "Very patient and thorough explanations.",
+                "author_email": "",
+                "time": "Just now"
+            },
+            {
+                "id": 14,
+                "review_text": "Helped me prepare for exams effectively.",
+                "author_email": "",
+                "time": "Just now"
+            }
+        ]
+    },
+    "next_tutor_review_id": 18
 }
