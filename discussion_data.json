@@ -35,6 +35,10 @@
                 {
                     "id": 6,
                     "reply_text": "hey girllllll"
+                },
+                {
+                    "id": 9,
+                    "reply_text": "hello"
                 }
             ]
         },
@@ -76,8 +80,16 @@
                     "reply_text": "Test"
                 }
             ]
+        },
+        {
+            "id": 4,
+            "major": "Computer Science",
+            "title": "hi test",
+            "time": "Just now",
+            "fins_up": 1,
+            "replies": []
         }
     ],
-    "next_discussion_id": 4,
-    "next_reply_id": 9
+    "next_discussion_id": 5,
+    "next_reply_id": 10
 }
