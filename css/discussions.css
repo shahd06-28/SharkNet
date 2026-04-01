@@ -14,13 +14,14 @@
     display: flex;
     justify-content: center; 
     align-items: center;
-    padding: 0 10px;
+    padding: 0 20px;
 }
 
+/* Top Bar Back Button */
 .top-bar .back-btn {
     position: absolute;
-    left: 0;
-    top: 0;
+    left: 15px;            
+    top: 5px;              
     padding: 8px 16px;
     font-size: 1.0rem;
     border-radius: 5px;
@@ -42,10 +43,10 @@ body {
 
 main {
     flex: 1;
-    padding: 20px 20px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: center; 
 }
 
 /* Header */
@@ -62,10 +63,10 @@ header.header {
     gap: 10px;
 }
 
-/* Majors */
+/* Majors Grid */
 .majors-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr); 
     gap: 15px;
     justify-content: center;
     margin: 0 auto;
@@ -77,8 +78,6 @@ header.header {
     color: #0072ce;
     font-weight: bold;
     font-size: 1.2rem;
-    width: 260px;
-    height: 120px;
     padding: 20px;
     text-align: center;
     border-radius: 12px;
@@ -89,6 +88,7 @@ header.header {
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 120px;
 }
 
 .major-card:hover {
@@ -116,18 +116,60 @@ header.header {
 
 /* Discussion Cards */
 .discussion-section {
-    max-width: 900px;
-    width: 90%;
-    margin: 20px auto 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    margin: 20px 0 0 0;
 }
 
-.discussion-section .discussion-card {
+/* Discussion & Create Post Cards */
+.discussion-section .discussion-card,
+.create-post-card {
     background: white;
     padding: 25px;
     margin-bottom: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     font-size: 1.1rem;
+    width: 100%;
+    max-width: 650px;  
+}
+
+/* Create Post Box */
+.create-post-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #0072ce;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.create-post-card textarea {
+    width: 100%;
+    height: 70px;
+    padding: 8px;
+    border-radius: 8px;
+    resize: none;
+    margin-bottom: 15px;
+}
+
+/* Post Button for Create Post Card */
+.post-new-btn {
+    display: block;
+    margin: 0 auto;
+    padding: 6px 14px; 
+    background: #0072ce;
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+.post-new-btn:hover {
+    background: #005bb5;
 }
 
 /* Card Header */
@@ -142,7 +184,7 @@ header.header {
     opacity: 0.7;
 }
 
-/* Fins */
+/* FinsUp */
 .fins-up {
     display: flex;
     align-items: center;
@@ -212,6 +254,7 @@ header.header {
 /* Replies */
 .reply-box {
     margin-top: 15px;
+    width: 100%;
 }
 
 /* Each reply */
@@ -246,27 +289,30 @@ header.header {
     color: white;
 }
 
-/* Textarea */
-textarea {
-    width: 80%;
-    height: 70px;
-    margin: 10px auto;
-    padding: 8px;
-    border-radius: 8px;
-    resize: none;
-    display: block;
-}
-
-/* Post button */
+/* Post Reply Button */
 .post-reply {
-    margin: 10px auto 15px auto;
-    display: block;
+    display: block;            
+    margin: 10px auto 0 auto;   
     background: #0072ce;
     color: white;
     border: none;
-    padding: 6px 14px;
+    padding: 6px 14px;        
     border-radius: 6px;
     cursor: pointer;
+    font-weight: bold;
+}
+
+.post-reply:hover {
+    background: #005bb5;
+}
+
+/* Textarea */
+textarea {
+    width: 100%;
+    min-height: 70px;
+    padding: 8px;
+    border-radius: 8px;
+    resize: vertical;
 }
 
 /* Hidden */
@@ -280,4 +326,23 @@ footer {
     padding: 20px;
     background: rgba(0,0,50,0.85);
     color: white;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1000px) {
+    .majors-grid {
+        grid-template-columns: repeat(2, 1fr); 
+    }
+}
+
+@media (max-width: 700px) {
+    .majors-grid {
+        grid-template-columns: repeat(2, 1fr); 
+    }
+
+    .discussion-section .discussion-card,
+    .create-post-card {
+        padding: 20px;
+        width: 95%;
+    }
 }

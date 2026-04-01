@@ -21,63 +21,7 @@
     </nav>
 </header>
 
-
-<!--Majors with example tutors-->
 <main>
-
-    <!-- Computer Science -->
-    <h2 class="section-title">Computer Science</h2>
-    <section class="tutor-list">
-        <!-- Jane Doe -->
-        <div class="tutor-card">
-            <div class="tutor-header">
-                <span class="tutor-name">Jane Doe</span>
-                <span class="rating">⭐ 4.9</span>
-            </div>
-            <div class="tutor-year-major">
-                <span class="tutor-year">Senior</span>
-                <span class="tutor-major">CS Major</span>
-            </div>
-            <p class="bio">Helps students understand algorithms, data structures, and programming concepts.</p>
-            <div class="card-buttons">
-                <button class="review-toggle">View Reviews</button>
-                <button class="book-btn">Book Session</button>
-            </div>
-            <div class="review-box hidden">
-                <div class="existing-reviews">
-                    <div class="review">"Super clear explanations!"</div>
-                    <div class="review">"Helped me debug my projects."</div>
-                </div>
-                <textarea placeholder="Write a review..."></textarea>
-                <button class="post-review">Post Review</button>
-            </div>
-        </div>
-
-        <!-- Alice Susan -->
-        <div class="tutor-card">
-            <div class="tutor-header">
-                <span class="tutor-name">Alice Susan</span>
-                <span class="rating">⭐ 4.7</span>
-            </div>
-            <div class="tutor-year-major">
-                <span class="tutor-year">Junior</span>
-                <span class="tutor-major">CS Major</span>
-            </div>
-            <p class="bio">Experienced in web apps and database management. Great for projects and homework help.</p>
-            <div class="card-buttons">
-                <button class="review-toggle">View Reviews</button>
-                <button class="book-btn">Book Session</button>
-            </div>
-            <div class="review-box hidden">
-                <div class="existing-reviews">
-                    <div class="review">"Helped me understand SQL queries."</div>
-                    <div class="review">"Super friendly and patient."</div>
-                </div>
-                <textarea placeholder="Write a review..."></textarea>
-                <button class="post-review">Post Review</button>
-            </div>
-        </div>
-    </section>
 
     <!-- Biology -->
     <h2 class="section-title">Biology</h2>
@@ -88,7 +32,7 @@
                 <span class="rating">⭐ 4.8</span>
             </div>
             <div class="tutor-year-major">
-                <span class="tutor-year">Sophomore</span>
+                <span class="tutor-year">Sophomore •</span>
                 <span class="tutor-major">Biology Major</span>
             </div>
             <p class="bio">Covers general biology, microbiology, and lab techniques for beginners.</p>
@@ -98,16 +42,224 @@
             </div>
             <div class="review-box hidden">
                 <div class="existing-reviews">
-                    <div class="review">"Explains concepts in a really understandable way."</div>
-                    <div class="review">"Great study tips for exams!"</div>
+                    <div class="review">"Explains concepts in a really understandable way."<button class="delete-reply-btn">Delete</button></div>
+                    <div class="review">"Great study tips for exams!"<button class="delete-reply-btn">Delete</button></div>
                 </div>
                 <textarea placeholder="Write a review..."></textarea>
-                <button class="post-review">Post Review</button>
+                <div class="review-buttons-row">
+                    <button class="post-review">Post Review</button>
+                    <div class="star-rating-row">
+                        <div class="star-rating">
+                            <span class="star" data-value="1">★</span>
+                            <span class="star" data-value="2">★</span>
+                            <span class="star" data-value="3">★</span>
+                            <span class="star" data-value="4">★</span>
+                            <span class="star" data-value="5">★</span>
+                        </div>
+                        <button class="submit-rating">Submit Rating</button>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Psychology -->
+    <!-- Business -->
+    <h2 class="section-title">Business</h2>
+    <section class="tutor-list">
+        <div class="tutor-card">
+            <div class="tutor-header">
+                <span class="tutor-name">Samantha Green</span>
+                <span class="rating">⭐ 4.7</span>
+            </div>
+            <div class="tutor-year-major">
+                <span class="tutor-year">Junior • </span>
+                <span class="tutor-major">Business Major</span>
+            </div>
+            <p class="bio">Focuses on finance, marketing, and business strategy for projects and exams.</p>
+            <div class="card-buttons">
+                <button class="review-toggle">View Reviews</button>
+                <button class="book-btn">Book Session</button>
+            </div>
+            <div class="review-box hidden">
+                <div class="existing-reviews">
+                    <div class="review">"Explains finance concepts clearly."<button class="delete-reply-btn">Delete</button></div>
+                    <div class="review">"Helped me with my marketing assignment."<button class="delete-reply-btn">Delete</button></div>
+                </div>
+                <textarea placeholder="Write a review..."></textarea>
+                <div class="review-buttons-row">
+                    <button class="post-review">Post Review</button>
+                    <div class="star-rating-row">
+                        <div class="star-rating">
+                            <span class="star" data-value="1">★</span>
+                            <span class="star" data-value="2">★</span>
+                            <span class="star" data-value="3">★</span>
+                            <span class="star" data-value="4">★</span>
+                            <span class="star" data-value="5">★</span>
+                        </div>
+                        <button class="submit-rating">Submit Rating</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Computer Science -->
+    <h2 class="section-title">Computer Science</h2>
+    <section class="tutor-list">
+        <div class="tutor-card">
+            <div class="tutor-header">
+                <span class="tutor-name">Alice Susan</span>
+                <span class="rating">⭐ 4.7</span>
+            </div>
+            <div class="tutor-year-major">
+                <span class="tutor-year">Junior • </span>
+                <span class="tutor-major">CS Major</span>
+            </div>
+            <p class="bio">Experienced in web apps and database management. Great for projects and homework help.</p>
+            <div class="card-buttons">
+                <button class="review-toggle">View Reviews</button>
+                <button class="book-btn">Book Session</button>
+            </div>
+            <div class="review-box hidden">
+                <div class="existing-reviews">
+                    <div class="review">"Helped me understand SQL queries."<button class="delete-reply-btn">Delete</button></div>
+                    <div class="review">"Super friendly and patient."<button class="delete-reply-btn">Delete</button></div>
+                </div>
+                <textarea placeholder="Write a review..."></textarea>
+                <div class="review-buttons-row">
+                    <button class="post-review">Post Review</button>
+                    <div class="star-rating-row">
+                        <div class="star-rating">
+                            <span class="star" data-value="1">★</span>
+                            <span class="star" data-value="2">★</span>
+                            <span class="star" data-value="3">★</span>
+                            <span class="star" data-value="4">★</span>
+                            <span class="star" data-value="5">★</span>
+                        </div>
+                        <button class="submit-rating">Submit Rating</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tutor-card">
+            <div class="tutor-header">
+                <span class="tutor-name">Jane Doe</span>
+                <span class="rating">⭐ 4.9</span>
+            </div>
+            <div class="tutor-year-major">
+                <span class="tutor-year">Senior • </span>
+                <span class="tutor-major">CS Major</span>
+            </div>
+            <p class="bio">Helps students understand algorithms, data structures, and programming concepts.</p>
+            <div class="card-buttons">
+                <button class="review-toggle">View Reviews</button>
+                <button class="book-btn">Book Session</button>
+            </div>
+            <div class="review-box hidden">
+                <div class="existing-reviews">
+                    <div class="review">"Super clear explanations!"<button class="delete-reply-btn">Delete</button></div>
+                    <div class="review">"Helped me debug my projects."<button class="delete-reply-btn">Delete</button></div>
+                </div>
+                <textarea placeholder="Write a review..."></textarea>
+                <div class="review-buttons-row">
+                    <button class="post-review">Post Review</button>
+                    <div class="star-rating-row">
+                        <div class="star-rating">
+                            <span class="star" data-value="1">★</span>
+                            <span class="star" data-value="2">★</span>
+                            <span class="star" data-value="3">★</span>
+                            <span class="star" data-value="4">★</span>
+                            <span class="star" data-value="5">★</span>
+                        </div>
+                        <button class="submit-rating">Submit Rating</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Engineering -->
+    <h2 class="section-title">Engineering</h2>
+    <section class="tutor-list">
+        <div class="tutor-card">
+            <div class="tutor-header">
+                <span class="tutor-name">John Smith</span>
+                <span class="rating">⭐ 4.8</span>
+            </div>
+            <div class="tutor-year-major">
+                <span class="tutor-year">Senior • </span>
+                <span class="tutor-major">Engineering Major</span>
+            </div>
+            <p class="bio">Specializes in mechanics, thermodynamics, and problem-solving for projects.</p>
+            <div class="card-buttons">
+                <button class="review-toggle">View Reviews</button>
+                <button class="book-btn">Book Session</button>
+            </div>
+            <div class="review-box hidden">
+                <div class="existing-reviews">
+                    <div class="review">"Great explanations for complex engineering topics."<button class="delete-reply-btn">Delete</button></div>
+                    <div class="review">"Helped me understand lab experiments."<button class="delete-reply-btn">Delete</button></div>
+                </div>
+                <textarea placeholder="Write a review..."></textarea>
+                <div class="review-buttons-row">
+                    <button class="post-review">Post Review</button>
+                    <div class="star-rating-row">
+                        <div class="star-rating">
+                            <span class="star" data-value="1">★</span>
+                            <span class="star" data-value="2">★</span>
+                            <span class="star" data-value="3">★</span>
+                            <span class="star" data-value="4">★</span>
+                            <span class="star" data-value="5">★</span>
+                        </div>
+                        <button class="submit-rating">Submit Rating</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Nursing -->
+    <h2 class="section-title">Nursing</h2>
+    <section class="tutor-list">
+        <div class="tutor-card">
+            <div class="tutor-header">
+                <span class="tutor-name">David Wilson</span>
+                <span class="rating">⭐ 4.8</span>
+            </div>
+            <div class="tutor-year-major">
+                <span class="tutor-year">Senior • </span>
+                <span class="tutor-major">Nursing Major</span>
+            </div>
+            <p class="bio">Provides guidance on anatomy, physiology, and clinical skills practice.</p>
+            <div class="card-buttons">
+                <button class="review-toggle">View Reviews</button>
+                <button class="book-btn">Book Session</button>
+            </div>
+            <div class="review-box hidden">
+                <div class="existing-reviews">
+                    <div class="review">"Very patient and thorough explanations."<button class="delete-reply-btn">Delete</button></div>
+                    <div class="review">"Helped me prepare for exams effectively."<button class="delete-reply-btn">Delete</button></div>
+                </div>
+                <textarea placeholder="Write a review..."></textarea>
+                <div class="review-buttons-row">
+                    <button class="post-review">Post Review</button>
+                    <div class="star-rating-row">
+                        <div class="star-rating">
+                            <span class="star" data-value="1">★</span>
+                            <span class="star" data-value="2">★</span>
+                            <span class="star" data-value="3">★</span>
+                            <span class="star" data-value="4">★</span>
+                            <span class="star" data-value="5">★</span>
+                        </div>
+                        <button class="submit-rating">Submit Rating</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Psychology Section -->
     <h2 class="section-title">Psychology</h2>
     <section class="tutor-list">
         <div class="tutor-card">
@@ -116,7 +268,7 @@
                 <span class="rating">⭐ 4.9</span>
             </div>
             <div class="tutor-year-major">
-                <span class="tutor-year">Senior</span>
+                <span class="tutor-year">Senior </span>
                 <span class="tutor-major">Psychology Major</span>
             </div>
             <p class="bio">Specializes in research methods, statistics, and essay writing guidance.</p>
@@ -135,93 +287,6 @@
         </div>
     </section>
 
-    <!-- Engineering -->
-    <h2 class="section-title">Engineering</h2>
-    <section class="tutor-list">
-        <div class="tutor-card">
-            <div class="tutor-header">
-                <span class="tutor-name">John Smith</span>
-                <span class="rating">⭐ 4.8</span>
-            </div>
-            <div class="tutor-year-major">
-                <span class="tutor-year">Senior</span>
-                <span class="tutor-major">Engineering Major</span>
-            </div>
-            <p class="bio">Specializes in mechanics, thermodynamics, and problem-solving for projects.</p>
-            <div class="card-buttons">
-                <button class="review-toggle">View Reviews</button>
-                <button class="book-btn">Book Session</button>
-            </div>
-            <div class="review-box hidden">
-                <div class="existing-reviews">
-                    <div class="review">"Great explanations for complex engineering topics."</div>
-                    <div class="review">"Helped me understand lab experiments."</div>
-                </div>
-                <textarea placeholder="Write a review..."></textarea>
-                <button class="post-review">Post Review</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Business -->
-    <h2 class="section-title">Business</h2>
-    <section class="tutor-list">
-        <div class="tutor-card">
-            <div class="tutor-header">
-                <span class="tutor-name">Samantha Green</span>
-                <span class="rating">⭐ 4.7</span>
-            </div>
-            <div class="tutor-year-major">
-                <span class="tutor-year">Junior</span>
-                <span class="tutor-major">Business Major</span>
-            </div>
-            <p class="bio">Focuses on finance, marketing, and business strategy for projects and exams.</p>
-            <div class="card-buttons">
-                <button class="review-toggle">View Reviews</button>
-                <button class="book-btn">Book Session</button>
-            </div>
-            <div class="review-box hidden">
-                <div class="existing-reviews">
-                    <div class="review">"Explains finance concepts clearly."</div>
-                    <div class="review">"Helped me with my marketing assignment."</div>
-                </div>
-                <textarea placeholder="Write a review..."></textarea>
-                <button class="post-review">Post Review</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Nursing -->
-    <h2 class="section-title">Nursing</h2>
-    <section class="tutor-list">
-        <div class="tutor-card">
-            <div class="tutor-header">
-                <span class="tutor-name">David Wilson</span>
-                <span class="rating">⭐ 4.8</span>
-            </div>
-            <div class="tutor-year-major">
-                <span class="tutor-year">Senior</span>
-                <span class="tutor-major">Nursing Major</span>
-            </div>
-            <p class="bio">Provides guidance on anatomy, physiology, and clinical skills practice.</p>
-            <div class="card-buttons">
-                <button class="review-toggle">View Reviews</button>
-                <button class="book-btn">Book Session</button>
-            </div>
-            <div class="review-box hidden">
-                <div class="existing-reviews">
-                    <div class="review">"Very patient and thorough explanations."</div>
-                    <div class="review">"Helped me prepare for exams effectively."</div>
-                </div>
-                <textarea placeholder="Write a review..."></textarea>
-                <button class="post-review">Post Review</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- More Majors Coming Soon -->
-    <h2 class="section-title" style="text-align: center; margin-top: 40px;">More Majors Coming Soon...</h2>
-
 </main>
 
 <footer>
@@ -229,7 +294,8 @@
 </footer>
 
 <script>
-// Toggle reviews
+    
+// Toggle review box
 document.querySelectorAll(".review-toggle").forEach(button => {
     button.addEventListener("click", () => {
         const reviewBox = button.closest(".tutor-card").querySelector(".review-box");
@@ -237,6 +303,28 @@ document.querySelectorAll(".review-toggle").forEach(button => {
         button.textContent = reviewBox.classList.contains("hidden") ? "View Reviews" : "Hide Reviews";
     });
 });
+
+// Star rating 
+document.querySelectorAll(".star-rating").forEach(container => {
+    const stars = container.querySelectorAll(".star");
+    let currentRating = 0;
+    stars.forEach(star => {
+        star.addEventListener("mouseover", () => {
+            const val = parseInt(star.dataset.value);
+            stars.forEach(s => s.classList.toggle("hovered", parseInt(s.dataset.value) <= val));
+        });
+        star.addEventListener("mouseout", () => {
+            stars.forEach(s => s.classList.remove("hovered"));
+            stars.forEach(s => s.classList.toggle("selected", parseInt(s.dataset.value) <= currentRating));
+        });
+        star.addEventListener("click", () => {
+            currentRating = parseInt(star.dataset.value);
+            stars.forEach(s => s.classList.toggle("selected", parseInt(s.dataset.value) <= currentRating));
+        });
+    });
+});
+
+
 </script>
 
 </body>
