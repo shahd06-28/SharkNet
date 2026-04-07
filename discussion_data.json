@@ -17,12 +17,19 @@
                         "sd2383@mynsu.nova.edu"
                     ],
                     "fins_up": 1
+                },
+                {
+                    "id": 12,
+                    "reply_text": "We dont get a building but we do have a red chair you can sit on at the 4th floor of the Desantis building :)",
+                    "author_email": "mm6386@mynsu.nova.edu",
+                    "liked_by": [],
+                    "fins_up": 0
                 }
             ]
         }
     ],
     "next_discussion_id": 9,
-    "next_reply_id": 12,
+    "next_reply_id": 13,
     "tutor_reviews": {
         "Jane Doe": [
             {
@@ -156,10 +163,11 @@
     "next_tutor_review_id": 20,
     "tutor_rating_data": {
         "Michael Brown": {
-            "total": 9.8,
-            "count": 2,
+            "total": 12.8,
+            "count": 3,
             "by_user": {
-                "sd2383@mynsu.nova.edu": 5
+                "sd2383@mynsu.nova.edu": 5,
+                "mm6386@mynsu.nova.edu": 3
             }
         },
         "Samantha Green": {
