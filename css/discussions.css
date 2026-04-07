@@ -346,3 +346,38 @@ footer {
         width: 95%;
     }
 }
+
+/* ------------------------------ */
+/* Campus Conversations Section */
+/* ------------------------------ */
+.campus-conversations-section {
+    margin-bottom: 80px; /* pushes Browse by Major section further down */
+}
+/* Campus Conversations Grid */
+.conversations-grid {
+    display: flex;
+    justify-content: center; 
+    align-items: center;    
+    margin: 0 auto;
+    gap: 20px;               
+}
+
+.conversation-card {
+    width: 250px;       
+    text-align: center; 
+    cursor: pointer;
+    padding: 25px;
+    background: white;
+    color: #0072ce;
+    font-weight: bold;
+    border-radius: 12px;
+    border: 2px solid #0072ce;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.conversation-card:hover {
+    background: #0072ce;
+    color: white;
+    transform: translateY(-3px) scale(1.03);
+}

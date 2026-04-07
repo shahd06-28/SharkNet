@@ -24,6 +24,16 @@
 
 <main>
 
+    <!-- Campus Conversations Section (main page only) -->
+    <section class="campus-conversations-section" id="campus-conversations">
+        <h2 class="section-title">Campus Conversations</h2>
+        <div class="conversations-grid">
+            <div class="conversation-card" onclick="location.href='discussions.html?major=Campus'">
+                Join Discussion
+            </div>
+        </div>
+    </section>
+
     <!-- Majors Grid -->
     <section class="majors-section" id="majors-section">
         <h2 class="section-title">Browse by Major</h2>
@@ -44,24 +54,33 @@
     <p>&copy; 2026 SharkNet • Prototype</p>
 </footer>
 
-<!-- Discussions Subpage -->
+<!-- Discussions Subpage Logic -->
 <script>
 const params = new URLSearchParams(window.location.search);
 const major = params.get("major");
 
+// Hide Campus Conversations and Majors Grid on subpages
 if (major) {
-    const main = document.querySelector('main');
-    document.getElementById("majors-section").style.display = "none";
+    const campusSection = document.getElementById("campus-conversations");
+    if (campusSection) campusSection.style.display = "none";
 
+    const majorsSection = document.getElementById("majors-section");
+    if (majorsSection) majorsSection.style.display = "none";
+
+    const main = document.querySelector('main');
+
+    // Page title
     const pageTitle = document.createElement("h2");
     pageTitle.textContent = major + " Discussions";
     pageTitle.className = "section-title";
 
+    // Back button
     const backBtn = document.createElement("button");
     backBtn.textContent = "← Back";
     backBtn.className = "back-btn";
     backBtn.onclick = () => location.href = 'discussions.html';
 
+    // Top bar container
     const topBar = document.createElement("div");
     topBar.className = "top-bar";
     topBar.appendChild(backBtn);

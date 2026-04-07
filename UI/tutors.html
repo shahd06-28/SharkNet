@@ -268,7 +268,7 @@
                 <span class="rating">⭐ 4.9</span>
             </div>
             <div class="tutor-year-major">
-                <span class="tutor-year">Senior </span>
+                <span class="tutor-year">Senior •</span>
                 <span class="tutor-major">Psychology Major</span>
             </div>
             <p class="bio">Specializes in research methods, statistics, and essay writing guidance.</p>
@@ -289,9 +289,37 @@
 
 </main>
 
+<!-- Booking Modal -->
+<div id="booking-modal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h3 id="tutor-name-modal">Tutor Name</h3>
+
+        <div class="booking-section">
+            <p>Select a date:</p>
+            <div id="date-buttons" class="button-grid"></div>
+        </div>
+
+        <div class="booking-section">
+            <p>Select a time:</p>
+            <div id="time-buttons" class="button-grid"></div>
+        </div>
+
+        <button id="confirm-booking" class="confirm-btn">Confirm Booking</button>
+    </div>
+</div>
+
 <footer>
     <p>&copy; 2026 SharkNet • Prototype</p>
 </footer>
+
+<!-- Fixed Tutor Request Box -->
+<div class="tutor-box">
+    <div class="emoji">💡</div>
+    <h4>Want to become a tutor? Volunteer today!</h4>
+    <p>Fill out a request form below</p>
+    <button class="become-tutor-btn">Request</button>
+</div>
 
 <script>
     
@@ -324,7 +352,84 @@ document.querySelectorAll(".star-rating").forEach(container => {
     });
 });
 
+// Booking modal
+const modal = document.getElementById("booking-modal");
+const tutorNameModal = document.getElementById("tutor-name-modal");
+const dateButtonsContainer = document.getElementById("date-buttons");
+const timeButtonsContainer = document.getElementById("time-buttons");
+const closeBtn = modal.querySelector(".close-btn");
 
+const tutorsSchedule = {
+    "Michael Brown": { dates: ["Monday", "Wednesday", "Friday"], times: ["1pm", "3pm", "6pm"] },
+    "Samantha Green": { dates: ["Tuesday", "Thursday", "Saturday"], times: ["2pm", "4pm", "5pm"] },
+    "Alice Susan": { dates: ["Monday", "Thursday", "Friday"], times: ["12pm", "3pm", "6pm"] },
+    "Jane Doe": { dates: ["Tuesday", "Wednesday", "Friday"], times: ["1pm", "4pm", "6pm"] },
+    "John Smith": { dates: ["Monday", "Wednesday", "Thursday"], times: ["10am", "2pm", "5pm"] },
+    "David Wilson": { dates: ["Tuesday", "Thursday", "Saturday"], times: ["11am", "3pm", "6pm"] },
+    "Emily Lee": { dates: ["Monday", "Wednesday", "Friday"], times: ["1pm", "3pm", "5pm"] }
+};
+
+// Book session click
+document.querySelectorAll(".book-btn").forEach(button => {
+    button.addEventListener("click", () => {
+        const card = button.closest(".tutor-card");
+        const tutorName = card.querySelector(".tutor-name").textContent;
+        tutorNameModal.textContent = tutorName;
+
+        dateButtonsContainer.innerHTML = "";
+        timeButtonsContainer.innerHTML = "";
+
+        const schedule = tutorsSchedule[tutorName];
+        schedule.dates.forEach(date => {
+            const btn = document.createElement("button");
+            btn.textContent = date;
+            btn.addEventListener("click", () => selectButton(btn, dateButtonsContainer));
+            dateButtonsContainer.appendChild(btn);
+        });
+
+        schedule.times.forEach(time => {
+            const btn = document.createElement("button");
+            btn.textContent = time;
+            btn.addEventListener("click", () => selectButton(btn, timeButtonsContainer));
+            timeButtonsContainer.appendChild(btn);
+        });
+
+        modal.classList.remove("hidden");
+        modal.classList.add("show");
+    });
+});
+
+// Close modal
+closeBtn.addEventListener("click", () => {
+    modal.classList.add("hidden");
+    modal.classList.remove("show");
+});
+
+window.addEventListener("click", e => {
+    if (e.target === modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("show");
+    }
+});
+
+// Select date/time button
+function selectButton(selectedBtn, container) {
+    container.querySelectorAll("button").forEach(btn => btn.classList.remove("selected"));
+    selectedBtn.classList.add("selected");
+}
+
+// Confirm booking
+document.getElementById("confirm-booking").addEventListener("click", () => {
+    const selectedDate = dateButtonsContainer.querySelector(".selected")?.textContent;
+    const selectedTime = timeButtonsContainer.querySelector(".selected")?.textContent;
+    if (!selectedDate || !selectedTime) {
+        alert("Please select both a date and time!");
+        return;
+    }
+    alert(`Booked ${tutorNameModal.textContent} on ${selectedDate} at ${selectedTime}`);
+    modal.classList.add("hidden");
+    modal.classList.remove("show");
+});
 </script>
 
 </body>

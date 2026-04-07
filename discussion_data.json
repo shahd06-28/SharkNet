@@ -101,6 +101,12 @@
                 "review_text": "great guy",
                 "author_email": "sd2383@mynsu.nova.edu",
                 "time": "Just now"
+            },
+            {
+                "id": 20,
+                "review_text": "WHAT THE HECK MICHAEL",
+                "author_email": "mm6386@mynsu.nova.edu",
+                "time": "Just now"
             }
         ],
         "Emily Lee": [
@@ -160,14 +166,14 @@
             }
         ]
     },
-    "next_tutor_review_id": 20,
+    "next_tutor_review_id": 21,
     "tutor_rating_data": {
         "Michael Brown": {
-            "total": 12.8,
+            "total": 14.8,
             "count": 3,
             "by_user": {
                 "sd2383@mynsu.nova.edu": 5,
-                "mm6386@mynsu.nova.edu": 3
+                "mm6386@mynsu.nova.edu": 5
             }
         },
         "Samantha Green": {
@@ -202,11 +208,7 @@
         }
     },
     "tutor_availability": {
-        "Michael Brown": [
-            "Monday 10:00 AM",
-            "Wednesday 1:00 PM",
-            "Thursday 3:00 PM"
-        ],
+        "Michael Brown": [],
         "Samantha Green": [],
         "Alice Susan": [
             "Monday 12:00 PM",
@@ -235,7 +237,20 @@
         ]
     },
     "tutor_bookings": {
-        "Michael Brown": [],
+        "Michael Brown": [
+            {
+                "student_email": "mm6386@mynsu.nova.edu",
+                "slot": "Monday 10:00 AM"
+            },
+            {
+                "student_email": "mm6386@mynsu.nova.edu",
+                "slot": "Wednesday 1:00 PM"
+            },
+            {
+                "student_email": "mm6386@mynsu.nova.edu",
+                "slot": "Thursday 3:00 PM"
+            }
+        ],
         "Samantha Green": [
             {
                 "student_email": "sd2383@mynsu.nova.edu",
