@@ -347,11 +347,10 @@ footer {
     }
 }
 
-/* ------------------------------ */
+
 /* Campus Conversations Section */
-/* ------------------------------ */
 .campus-conversations-section {
-    margin-bottom: 80px; /* pushes Browse by Major section further down */
+    margin-bottom: 80px; 
 }
 /* Campus Conversations Grid */
 .conversations-grid {

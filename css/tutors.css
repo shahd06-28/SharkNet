@@ -169,12 +169,12 @@
 /* Star rating */
 .star {
     font-size: 1.2rem;
-    color: #ccc; /* default gray for unselected stars */
+    color: #ccc; 
 }
 
 .star.hovered,
 .star.selected {
-    color: #e7c209; /* orange for hovered or selected stars */
+    color: #e7c209; 
 }
 
 /* Submit rating button */
@@ -188,7 +188,7 @@
 }
 
 .submit-rating:hover {
-    background: #e7c209; /* slightly darker orange on hover */
+    background: #e7c209; 
 }
 
 /* Delete reply button */
