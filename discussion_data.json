@@ -1,60 +1,28 @@
 {
     "discussions_data": [
         {
-            "id": 3,
+            "id": 8,
             "major": "Computer Science",
-            "title": "Hey how are ya",
+            "title": "Is there a computer science building at Nova?",
             "time": "Just now",
-            "fins_up": 1,
+            "author_email": "sd2383@mynsu.nova.edu",
+            "liked_by": [],
+            "fins_up": 0,
             "replies": [
                 {
-                    "id": 5,
-                    "reply_text": "Heyy",
-                    "author_email": "",
-                    "liked_by": [
-                        "sd2383@mynsu.nova.edu"
-                    ],
-                    "fins_up": 1
-                },
-                {
-                    "id": 7,
-                    "reply_text": "Heyyyy",
-                    "author_email": "",
-                    "liked_by": [
-                        "sd2383@mynsu.nova.edu"
-                    ],
-                    "fins_up": 1
-                },
-                {
-                    "id": 8,
-                    "reply_text": "Test",
-                    "author_email": "",
+                    "id": 11,
+                    "reply_text": "No not a building, but the 4th floor in Carl Desantis is the Computing and Engineering floor.",
+                    "author_email": "sd2383@mynsu.nova.edu",
                     "liked_by": [
                         "sd2383@mynsu.nova.edu"
                     ],
                     "fins_up": 1
                 }
-            ],
-            "author_email": "",
-            "liked_by": [
-                "sd2383@mynsu.nova.edu"
-            ]
-        },
-        {
-            "id": 4,
-            "major": "Computer Science",
-            "title": "hi test",
-            "time": "Just now",
-            "fins_up": 1,
-            "replies": [],
-            "author_email": "",
-            "liked_by": [
-                "sd2383@mynsu.nova.edu"
             ]
         }
     ],
-    "next_discussion_id": 7,
-    "next_reply_id": 11,
+    "next_discussion_id": 9,
+    "next_reply_id": 12,
     "tutor_reviews": {
         "Jane Doe": [
             {
@@ -120,6 +88,12 @@
                 "review_text": "Great study tips for exams!",
                 "author_email": "",
                 "time": "Just now"
+            },
+            {
+                "id": 19,
+                "review_text": "great guy",
+                "author_email": "sd2383@mynsu.nova.edu",
+                "time": "Just now"
             }
         ],
         "Emily Lee": [
@@ -179,5 +153,99 @@
             }
         ]
     },
-    "next_tutor_review_id": 19
+    "next_tutor_review_id": 20,
+    "tutor_rating_data": {
+        "Michael Brown": {
+            "total": 9.8,
+            "count": 2,
+            "by_user": {
+                "sd2383@mynsu.nova.edu": 5
+            }
+        },
+        "Samantha Green": {
+            "total": 4.7,
+            "count": 1,
+            "by_user": {}
+        },
+        "Alice Susan": {
+            "total": 4.7,
+            "count": 1,
+            "by_user": {}
+        },
+        "Jane Doe": {
+            "total": 4.9,
+            "count": 1,
+            "by_user": {}
+        },
+        "John Smith": {
+            "total": 4.8,
+            "count": 1,
+            "by_user": {}
+        },
+        "David Wilson": {
+            "total": 4.8,
+            "count": 1,
+            "by_user": {}
+        },
+        "Emily Lee": {
+            "total": 4.9,
+            "count": 1,
+            "by_user": {}
+        }
+    },
+    "tutor_availability": {
+        "Michael Brown": [
+            "Monday 10:00 AM",
+            "Wednesday 1:00 PM",
+            "Thursday 3:00 PM"
+        ],
+        "Samantha Green": [],
+        "Alice Susan": [
+            "Monday 12:00 PM",
+            "Wednesday 4:00 PM",
+            "Friday 10:00 AM"
+        ],
+        "Jane Doe": [
+            "Tuesday 1:00 PM",
+            "Thursday 11:00 AM",
+            "Friday 2:00 PM"
+        ],
+        "John Smith": [
+            "Monday 3:00 PM",
+            "Wednesday 10:00 AM",
+            "Friday 12:00 PM"
+        ],
+        "David Wilson": [
+            "Tuesday 9:00 AM",
+            "Thursday 1:00 PM",
+            "Friday 3:00 PM"
+        ],
+        "Emily Lee": [
+            "Monday 11:00 AM",
+            "Wednesday 2:00 PM",
+            "Thursday 4:00 PM"
+        ]
+    },
+    "tutor_bookings": {
+        "Michael Brown": [],
+        "Samantha Green": [
+            {
+                "student_email": "sd2383@mynsu.nova.edu",
+                "slot": "Tuesday 11:00 AM"
+            },
+            {
+                "student_email": "sd2383@mynsu.nova.edu",
+                "slot": "Thursday 2:00 PM"
+            },
+            {
+                "student_email": "sd2383@mynsu.nova.edu",
+                "slot": "Friday 4:00 PM"
+            }
+        ],
+        "Alice Susan": [],
+        "Jane Doe": [],
+        "John Smith": [],
+        "David Wilson": [],
+        "Emily Lee": []
+    }
 }

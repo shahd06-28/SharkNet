@@ -13,13 +13,51 @@ DATA_FILE = os.path.join(BASE_DIR, "discussion_data.json")
 # --------------------------------------------------
 # DATA STORAGE
 # --------------------------------------------------
+# Discussions data
 discussions_data = []
 next_discussion_id = 1
 next_reply_id = 1
+
+# Tutor reviews
 tutor_reviews = {}
 next_tutor_review_id = 1
 
+# Tutor ratings
+# Stored as:
+# {
+#   "Jane Doe": {
+#       "total": 4.9,
+#       "count": 1,
+#       "by_user": {
+#           "student@mynsu.nova.edu": 5
+#       }
+#   }
+# }
+tutor_rating_data = {}
 
+# Tutor availability
+# Stored as:
+# {
+#   "Jane Doe": ["Monday 10:00 AM", "Tuesday 2:00 PM", ...]
+# }
+tutor_availability = {}
+
+# Tutor bookings
+# Stored as:
+# {
+#   "Jane Doe": [
+#       {
+#           "student_email": "student@mynsu.nova.edu",
+#           "slot": "Monday 10:00 AM"
+#       }
+#   ]
+# }
+tutor_bookings = {}
+
+
+# --------------------------------------------------
+# DEFAULT TUTOR REVIEWS
+# --------------------------------------------------
 def get_default_tutor_reviews():
     return {
         "Jane Doe": [
@@ -123,21 +161,92 @@ def get_default_tutor_reviews():
     }
 
 
+# --------------------------------------------------
+# DEFAULT TUTOR RATINGS
+# --------------------------------------------------
+# These preserve the starting values already shown in your UI.
+def get_default_tutor_rating_data():
+    return {
+        "Michael Brown": {"total": 4.8, "count": 1, "by_user": {}},
+        "Samantha Green": {"total": 4.7, "count": 1, "by_user": {}},
+        "Alice Susan": {"total": 4.7, "count": 1, "by_user": {}},
+        "Jane Doe": {"total": 4.9, "count": 1, "by_user": {}},
+        "John Smith": {"total": 4.8, "count": 1, "by_user": {}},
+        "David Wilson": {"total": 4.8, "count": 1, "by_user": {}},
+        "Emily Lee": {"total": 4.9, "count": 1, "by_user": {}}
+    }
+
+
+# --------------------------------------------------
+# DEFAULT TUTOR AVAILABILITY
+# --------------------------------------------------
+def get_default_tutor_availability():
+    return {
+        "Michael Brown": [
+            "Monday 10:00 AM",
+            "Wednesday 1:00 PM",
+            "Thursday 3:00 PM"
+        ],
+        "Samantha Green": [
+            "Tuesday 11:00 AM",
+            "Thursday 2:00 PM",
+            "Friday 4:00 PM"
+        ],
+        "Alice Susan": [
+            "Monday 12:00 PM",
+            "Wednesday 4:00 PM",
+            "Friday 10:00 AM"
+        ],
+        "Jane Doe": [
+            "Tuesday 1:00 PM",
+            "Thursday 11:00 AM",
+            "Friday 2:00 PM"
+        ],
+        "John Smith": [
+            "Monday 3:00 PM",
+            "Wednesday 10:00 AM",
+            "Friday 12:00 PM"
+        ],
+        "David Wilson": [
+            "Tuesday 9:00 AM",
+            "Thursday 1:00 PM",
+            "Friday 3:00 PM"
+        ],
+        "Emily Lee": [
+            "Monday 11:00 AM",
+            "Wednesday 2:00 PM",
+            "Thursday 4:00 PM"
+        ]
+    }
+
+
+# --------------------------------------------------
+# SAVE DATA TO JSON
+# --------------------------------------------------
 def save_data():
     data = {
         "discussions_data": discussions_data,
         "next_discussion_id": next_discussion_id,
         "next_reply_id": next_reply_id,
         "tutor_reviews": tutor_reviews,
-        "next_tutor_review_id": next_tutor_review_id
+        "next_tutor_review_id": next_tutor_review_id,
+        "tutor_rating_data": tutor_rating_data,
+        "tutor_availability": tutor_availability,
+        "tutor_bookings": tutor_bookings
     }
+
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
 
 
+# --------------------------------------------------
+# CLEAN / MIGRATE LOADED DATA
+# --------------------------------------------------
 def migrate_loaded_data():
     global discussions_data, tutor_reviews, next_tutor_review_id
+    global tutor_rating_data, tutor_availability, tutor_bookings
 
+    # Make sure discussions always have needed keys
     for discussion in discussions_data:
         if "author_email" not in discussion:
             discussion["author_email"] = ""
@@ -156,6 +265,7 @@ def migrate_loaded_data():
             if "fins_up" not in reply:
                 reply["fins_up"] = len(reply["liked_by"])
 
+    # Reviews
     default_reviews = get_default_tutor_reviews()
 
     if not isinstance(tutor_reviews, dict):
@@ -165,14 +275,14 @@ def migrate_loaded_data():
             if tutor_name not in tutor_reviews:
                 tutor_reviews[tutor_name] = reviews
 
-    max_id = 0
+    max_review_id = 0
     for review_list in tutor_reviews.values():
         for review in review_list:
             if "id" not in review:
-                max_id += 1
-                review["id"] = max_id
+                max_review_id += 1
+                review["id"] = max_review_id
             else:
-                max_id = max(max_id, review["id"])
+                max_review_id = max(max_review_id, review["id"])
 
             if "review_text" not in review:
                 review["review_text"] = ""
@@ -181,28 +291,76 @@ def migrate_loaded_data():
             if "time" not in review:
                 review["time"] = "Just now"
 
-    if next_tutor_review_id <= max_id:
-        next_tutor_review_id = max_id + 1
+    if next_tutor_review_id <= max_review_id:
+        next_tutor_review_id = max_review_id + 1
+
+    # Ratings
+    default_ratings = get_default_tutor_rating_data()
+
+    if not isinstance(tutor_rating_data, dict):
+        tutor_rating_data = default_ratings
+    else:
+        for tutor_name, rating_info in default_ratings.items():
+            if tutor_name not in tutor_rating_data:
+                tutor_rating_data[tutor_name] = rating_info
+            else:
+                tutor_rating_data[tutor_name].setdefault("total", rating_info["total"])
+                tutor_rating_data[tutor_name].setdefault("count", rating_info["count"])
+                tutor_rating_data[tutor_name].setdefault("by_user", {})
+
+    # Availability
+    default_availability = get_default_tutor_availability()
+
+    if not isinstance(tutor_availability, dict):
+        tutor_availability = default_availability
+    else:
+        for tutor_name, slots in default_availability.items():
+            if tutor_name not in tutor_availability:
+                tutor_availability[tutor_name] = slots
+
+    # Bookings
+    if not isinstance(tutor_bookings, dict):
+        tutor_bookings = {}
+
+    for tutor_name in default_availability.keys():
+        tutor_bookings.setdefault(tutor_name, [])
 
 
+# --------------------------------------------------
+# LOAD DATA FROM JSON
+# --------------------------------------------------
 def load_data():
-    global discussions_data, next_discussion_id, next_reply_id, tutor_reviews, next_tutor_review_id
+    global discussions_data, next_discussion_id, next_reply_id
+    global tutor_reviews, next_tutor_review_id
+    global tutor_rating_data, tutor_availability, tutor_bookings
 
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
-            discussions_data = data.get("discussions_data", [])
-            next_discussion_id = data.get("next_discussion_id", 1)
-            next_reply_id = data.get("next_reply_id", 1)
-            tutor_reviews = data.get("tutor_reviews", get_default_tutor_reviews())
-            next_tutor_review_id = data.get("next_tutor_review_id", 1)
-            migrate_loaded_data()
+
+        discussions_data = data.get("discussions_data", [])
+        next_discussion_id = data.get("next_discussion_id", 1)
+        next_reply_id = data.get("next_reply_id", 1)
+
+        tutor_reviews = data.get("tutor_reviews", get_default_tutor_reviews())
+        next_tutor_review_id = data.get("next_tutor_review_id", 1)
+
+        tutor_rating_data = data.get("tutor_rating_data", get_default_tutor_rating_data())
+        tutor_availability = data.get("tutor_availability", get_default_tutor_availability())
+        tutor_bookings = data.get("tutor_bookings", {})
+
+        migrate_loaded_data()
     else:
         discussions_data = []
         next_discussion_id = 1
         next_reply_id = 1
+
         tutor_reviews = get_default_tutor_reviews()
         next_tutor_review_id = 15
+
+        tutor_rating_data = get_default_tutor_rating_data()
+        tutor_availability = get_default_tutor_availability()
+        tutor_bookings = {name: [] for name in tutor_availability.keys()}
 
 
 # --------------------------------------------------
@@ -609,16 +767,43 @@ if (major) {
 </script>
 """
 
+
 # --------------------------------------------------
 # RUNTIME SCRIPT INJECTION FOR ORIGINAL tutors.html
 # --------------------------------------------------
 TUTORS_RUNTIME_SCRIPT = r"""
 <script>
+const selectedTutorRatings = {};
+
 function createTutorReviewElement(review) {
     const reviewDiv = document.createElement("div");
     reviewDiv.className = "review";
     reviewDiv.textContent = `"${review.review_text}"`;
     return reviewDiv;
+}
+
+function ensureBookingBox(card) {
+    let bookingBox = card.querySelector(".booking-box");
+
+    if (!bookingBox) {
+        bookingBox = document.createElement("div");
+        bookingBox.className = "booking-box hidden";
+        bookingBox.innerHTML = `
+            <div class="booking-title"><strong>Available Sessions</strong></div>
+            <div class="booking-slots"></div>
+            <div class="booking-message"></div>
+        `;
+
+        const cardButtons = card.querySelector(".card-buttons");
+        cardButtons.insertAdjacentElement("afterend", bookingBox);
+    }
+
+    return bookingBox;
+}
+
+function updateRatingText(card, average) {
+    const ratingSpan = card.querySelector(".rating");
+    ratingSpan.textContent = `⭐ ${average.toFixed(1)}`;
 }
 
 async function loadTutorReviews() {
@@ -649,12 +834,180 @@ async function loadTutorReviews() {
     }
 }
 
+async function loadTutorRatings() {
+    try {
+        const response = await fetch("/api/tutors/ratings");
+        const result = await response.json();
+
+        if (!response.ok) {
+            alert(result.error || "Failed to load tutor ratings.");
+            return;
+        }
+
+        document.querySelectorAll(".tutor-card").forEach(card => {
+            const tutorName = card.querySelector(".tutor-name").textContent.trim();
+            const ratingInfo = result[tutorName];
+
+            if (ratingInfo) {
+                updateRatingText(card, ratingInfo.average);
+            }
+        });
+
+    } catch (error) {
+        console.error("Load tutor ratings error:", error);
+        alert("An error occurred while loading tutor ratings.");
+    }
+}
+
+async function renderBookingSlots(card, tutorName) {
+    const bookingBox = ensureBookingBox(card);
+    const slotsContainer = bookingBox.querySelector(".booking-slots");
+    const bookingMessage = bookingBox.querySelector(".booking-message");
+
+    slotsContainer.innerHTML = "";
+    bookingMessage.textContent = "";
+
+    try {
+        const response = await fetch(`/api/tutors/availability?tutor_name=${encodeURIComponent(tutorName)}`);
+        const result = await response.json();
+
+        if (!response.ok) {
+            bookingMessage.textContent = result.error || "Failed to load availability.";
+            return;
+        }
+
+        if (!result.available_slots || result.available_slots.length === 0) {
+            bookingMessage.textContent = "No open times right now.";
+            return;
+        }
+
+        result.available_slots.forEach(slot => {
+            const slotButton = document.createElement("button");
+            slotButton.className = "booking-slot-btn";
+            slotButton.textContent = slot;
+
+            slotButton.addEventListener("click", async () => {
+                try {
+                    const bookResponse = await fetch("/api/tutors/bookings", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            tutor_name: tutorName,
+                            slot: slot
+                        })
+                    });
+
+                    const bookResult = await bookResponse.json();
+
+                    if (!bookResponse.ok) {
+                        bookingMessage.textContent = bookResult.error || "Failed to book session.";
+                        return;
+                    }
+
+                    bookingMessage.textContent = `Booked: ${slot}`;
+                    await renderBookingSlots(card, tutorName);
+
+                } catch (error) {
+                    console.error("Booking error:", error);
+                    bookingMessage.textContent = "An error occurred while booking.";
+                }
+            });
+
+            slotsContainer.appendChild(slotButton);
+        });
+
+    } catch (error) {
+        console.error("Availability error:", error);
+        bookingMessage.textContent = "An error occurred while loading availability.";
+    }
+}
+
 document.querySelectorAll(".review-toggle").forEach(button => {
     button.addEventListener("click", () => {
         const reviewBox = button.closest(".tutor-card").querySelector(".review-box");
         reviewBox.classList.toggle("hidden");
         button.textContent = reviewBox.classList.contains("hidden") ? "View Reviews" : "Hide Reviews";
     });
+});
+
+document.querySelectorAll(".tutor-card").forEach(card => {
+    const tutorName = card.querySelector(".tutor-name").textContent.trim();
+    const stars = card.querySelectorAll(".star");
+    const submitRatingBtn = card.querySelector(".submit-rating");
+    const bookBtn = card.querySelector(".book-btn");
+
+    let currentRating = 0;
+
+    // Star hover/click behavior
+    stars.forEach(star => {
+        star.addEventListener("mouseover", () => {
+            const val = parseInt(star.dataset.value);
+            stars.forEach(s => s.classList.toggle("hovered", parseInt(s.dataset.value) <= val));
+        });
+
+        star.addEventListener("mouseout", () => {
+            stars.forEach(s => s.classList.remove("hovered"));
+            stars.forEach(s => s.classList.toggle("selected", parseInt(s.dataset.value) <= currentRating));
+        });
+
+        star.addEventListener("click", () => {
+            currentRating = parseInt(star.dataset.value);
+            selectedTutorRatings[tutorName] = currentRating;
+            stars.forEach(s => s.classList.toggle("selected", parseInt(s.dataset.value) <= currentRating));
+        });
+    });
+
+    // Rating submit button
+    if (submitRatingBtn) {
+    submitRatingBtn.addEventListener("click", async () => {
+        const ratingValue = selectedTutorRatings[tutorName];
+
+        if (!ratingValue) {
+            alert("Please choose a star rating first.");
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/tutors/ratings", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    tutor_name: tutorName,
+                    rating: ratingValue
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.error || "Failed to submit rating.");
+                return;
+            }
+
+            updateRatingText(card, result.average);
+
+        } catch (error) {
+            console.error("Submit rating error:", error);
+            alert("An error occurred while submitting the rating.");
+        }
+    });
+}
+
+    // Book session button
+    if (bookBtn) {
+        bookBtn.addEventListener("click", async () => {
+            const bookingBox = ensureBookingBox(card);
+            bookingBox.classList.toggle("hidden");
+
+            if (!bookingBox.classList.contains("hidden")) {
+                await renderBookingSlots(card, tutorName);
+            }
+        });
+    }
 });
 
 document.querySelectorAll(".post-review").forEach(button => {
@@ -700,10 +1053,14 @@ document.querySelectorAll(".post-review").forEach(button => {
 });
 
 loadTutorReviews();
+loadTutorRatings();
 </script>
 """
 
 
+# --------------------------------------------------
+# HTML INJECTION HELPERS
+# --------------------------------------------------
 def serve_discussions_with_runtime_script():
     file_path = os.path.join(UI_DIR, "discussions.html")
 
@@ -826,7 +1183,7 @@ def logout():
 
 
 # --------------------------------------------------
-# GET DISCUSSIONS BY MAJOR
+# DISCUSSION ROUTES
 # --------------------------------------------------
 @app.route("/api/discussions", methods=["GET"])
 def get_discussions():
@@ -842,9 +1199,6 @@ def get_discussions():
     return jsonify(filtered), 200
 
 
-# --------------------------------------------------
-# CREATE DISCUSSION
-# --------------------------------------------------
 @app.route("/api/discussions", methods=["POST"])
 def create_discussion():
     global next_discussion_id
@@ -877,9 +1231,6 @@ def create_discussion():
     return jsonify(new_discussion), 201
 
 
-# --------------------------------------------------
-# TOGGLE LIKE FOR DISCUSSION
-# --------------------------------------------------
 @app.route("/api/discussions/toggle_like", methods=["POST"])
 def toggle_discussion_like():
     if "user" not in session:
@@ -914,9 +1265,6 @@ def toggle_discussion_like():
     return jsonify({"error": "Discussion not found"}), 404
 
 
-# --------------------------------------------------
-# DELETE DISCUSSION
-# --------------------------------------------------
 @app.route("/api/discussions/<int:discussion_id>", methods=["DELETE"])
 def delete_discussion(discussion_id):
     if "user" not in session:
@@ -936,9 +1284,6 @@ def delete_discussion(discussion_id):
     return jsonify({"error": "Discussion not found"}), 404
 
 
-# --------------------------------------------------
-# CREATE REPLY
-# --------------------------------------------------
 @app.route("/api/replies", methods=["POST"])
 def create_reply():
     global next_reply_id
@@ -972,9 +1317,6 @@ def create_reply():
     return jsonify({"error": "Discussion not found"}), 404
 
 
-# --------------------------------------------------
-# TOGGLE LIKE FOR REPLY
-# --------------------------------------------------
 @app.route("/api/replies/toggle_like", methods=["POST"])
 def toggle_reply_like():
     if "user" not in session:
@@ -1014,9 +1356,6 @@ def toggle_reply_like():
     return jsonify({"error": "Discussion not found"}), 404
 
 
-# --------------------------------------------------
-# DELETE REPLY
-# --------------------------------------------------
 @app.route("/api/replies/<int:reply_id>", methods=["DELETE"])
 def delete_reply(reply_id):
     if "user" not in session:
@@ -1039,7 +1378,7 @@ def delete_reply(reply_id):
 
 
 # --------------------------------------------------
-# GET TUTOR REVIEWS
+# TUTOR REVIEW ROUTES
 # --------------------------------------------------
 @app.route("/api/tutors/reviews", methods=["GET"])
 def get_tutor_reviews():
@@ -1049,9 +1388,6 @@ def get_tutor_reviews():
     return jsonify(tutor_reviews), 200
 
 
-# --------------------------------------------------
-# CREATE TUTOR REVIEW
-# --------------------------------------------------
 @app.route("/api/tutors/reviews", methods=["POST"])
 def create_tutor_review():
     global next_tutor_review_id
@@ -1085,6 +1421,140 @@ def create_tutor_review():
     save_data()
 
     return jsonify(new_review), 201
+
+
+# --------------------------------------------------
+# TUTOR RATING ROUTES
+# --------------------------------------------------
+@app.route("/api/tutors/ratings", methods=["GET"])
+def get_tutor_ratings():
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    rating_summary = {}
+
+    for tutor_name, info in tutor_rating_data.items():
+        total = float(info.get("total", 0))
+        count = int(info.get("count", 0))
+        average = total / count if count > 0 else 0
+
+        rating_summary[tutor_name] = {
+            "average": average,
+            "count": count
+        }
+
+    return jsonify(rating_summary), 200
+
+
+@app.route("/api/tutors/ratings", methods=["POST"])
+def submit_tutor_rating():
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json()
+
+    if not data or not data.get("tutor_name") or data.get("rating") is None:
+        return jsonify({"error": "Missing data"}), 400
+
+    tutor_name = data["tutor_name"].strip()
+    user_email = session["user"]
+
+    try:
+        rating_value = int(data["rating"])
+    except (TypeError, ValueError):
+        return jsonify({"error": "Rating must be a number"}), 400
+
+    if rating_value < 1 or rating_value > 5:
+        return jsonify({"error": "Rating must be between 1 and 5"}), 400
+
+    if tutor_name not in tutor_rating_data:
+        tutor_rating_data[tutor_name] = {
+            "total": 0,
+            "count": 0,
+            "by_user": {}
+        }
+
+    info = tutor_rating_data[tutor_name]
+    by_user = info.setdefault("by_user", {})
+
+    # If this user already rated this tutor, replace old rating
+    if user_email in by_user:
+        old_rating = by_user[user_email]
+        info["total"] = float(info.get("total", 0)) - old_rating + rating_value
+        by_user[user_email] = rating_value
+    else:
+        info["total"] = float(info.get("total", 0)) + rating_value
+        info["count"] = int(info.get("count", 0)) + 1
+        by_user[user_email] = rating_value
+
+    average = info["total"] / info["count"] if info["count"] > 0 else 0
+    save_data()
+
+    return jsonify({
+        "tutor_name": tutor_name,
+        "average": average,
+        "count": info["count"],
+        "your_rating": rating_value
+    }), 200
+
+
+# --------------------------------------------------
+# TUTOR AVAILABILITY / BOOKING ROUTES
+# --------------------------------------------------
+@app.route("/api/tutors/availability", methods=["GET"])
+def get_tutor_availability():
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    tutor_name = request.args.get("tutor_name", "").strip()
+
+    if not tutor_name:
+        return jsonify({"error": "tutor_name is required"}), 400
+
+    available_slots = tutor_availability.get(tutor_name, [])
+
+    return jsonify({
+        "tutor_name": tutor_name,
+        "available_slots": available_slots
+    }), 200
+
+
+@app.route("/api/tutors/bookings", methods=["POST"])
+def create_tutor_booking():
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json()
+
+    if not data or not data.get("tutor_name") or not data.get("slot"):
+        return jsonify({"error": "Missing data"}), 400
+
+    tutor_name = data["tutor_name"].strip()
+    slot = data["slot"].strip()
+    user_email = session["user"]
+
+    if tutor_name not in tutor_availability:
+        return jsonify({"error": "Tutor not found"}), 404
+
+    if slot not in tutor_availability[tutor_name]:
+        return jsonify({"error": "That time is no longer available"}), 400
+
+    # Remove booked slot from available list
+    tutor_availability[tutor_name].remove(slot)
+
+    # Save booking
+    tutor_bookings.setdefault(tutor_name, []).append({
+        "student_email": user_email,
+        "slot": slot
+    })
+
+    save_data()
+
+    return jsonify({
+        "message": "Session booked successfully",
+        "tutor_name": tutor_name,
+        "slot": slot
+    }), 201
 
 
 # --------------------------------------------------
