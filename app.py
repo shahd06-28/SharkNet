@@ -2,366 +2,20 @@ from flask import Flask, send_from_directory, request, redirect, session, jsonif
 import os
 import json
 import re
+import sqlite3
 
 app = Flask(__name__)
 app.secret_key = "sharknet_secret_key"
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UI_DIR = os.path.join(BASE_DIR, "UI")
-DATA_FILE = os.path.join(BASE_DIR, "discussion_data.json")
 
-# --------------------------------------------------
-# DATA STORAGE
-# --------------------------------------------------
-# Discussions data
-discussions_data = []
-next_discussion_id = 1
-next_reply_id = 1
+DB = os.path.join(BASE_DIR, "sharknet.db")
 
-# Tutor reviews
-tutor_reviews = {}
-next_tutor_review_id = 1
-
-# Tutor ratings
-# Stored as:
-# {
-#   "Jane Doe": {
-#       "total": 4.9,
-#       "count": 1,
-#       "by_user": {
-#           "student@mynsu.nova.edu": 5
-#       }
-#   }
-# }
-tutor_rating_data = {}
-
-# Tutor availability
-# Stored as:
-# {
-#   "Jane Doe": ["Monday 10:00 AM", "Tuesday 2:00 PM", ...]
-# }
-tutor_availability = {}
-
-# Tutor bookings
-# Stored as:
-# {
-#   "Jane Doe": [
-#       {
-#           "student_email": "student@mynsu.nova.edu",
-#           "slot": "Monday 10:00 AM"
-#       }
-#   ]
-# }
-tutor_bookings = {}
-
-
-# --------------------------------------------------
-# DEFAULT TUTOR REVIEWS
-# --------------------------------------------------
-def get_default_tutor_reviews():
-    return {
-        "Jane Doe": [
-            {
-                "id": 1,
-                "review_text": "Super clear explanations!",
-                "author_email": "",
-                "time": "Just now"
-            },
-            {
-                "id": 2,
-                "review_text": "Helped me debug my projects.",
-                "author_email": "",
-                "time": "Just now"
-            }
-        ],
-        "Alice Susan": [
-            {
-                "id": 3,
-                "review_text": "Helped me understand SQL queries.",
-                "author_email": "",
-                "time": "Just now"
-            },
-            {
-                "id": 4,
-                "review_text": "Super friendly and patient.",
-                "author_email": "",
-                "time": "Just now"
-            }
-        ],
-        "Michael Brown": [
-            {
-                "id": 5,
-                "review_text": "Explains concepts in a really understandable way.",
-                "author_email": "",
-                "time": "Just now"
-            },
-            {
-                "id": 6,
-                "review_text": "Great study tips for exams!",
-                "author_email": "",
-                "time": "Just now"
-            }
-        ],
-        "Emily Lee": [
-            {
-                "id": 7,
-                "review_text": "Helped me improve my research paper.",
-                "author_email": "",
-                "time": "Just now"
-            },
-            {
-                "id": 8,
-                "review_text": "Very knowledgeable and patient.",
-                "author_email": "",
-                "time": "Just now"
-            }
-        ],
-        "John Smith": [
-            {
-                "id": 9,
-                "review_text": "Great explanations for complex engineering topics.",
-                "author_email": "",
-                "time": "Just now"
-            },
-            {
-                "id": 10,
-                "review_text": "Helped me understand lab experiments.",
-                "author_email": "",
-                "time": "Just now"
-            }
-        ],
-        "Samantha Green": [
-            {
-                "id": 11,
-                "review_text": "Explains finance concepts clearly.",
-                "author_email": "",
-                "time": "Just now"
-            },
-            {
-                "id": 12,
-                "review_text": "Helped me with my marketing assignment.",
-                "author_email": "",
-                "time": "Just now"
-            }
-        ],
-        "David Wilson": [
-            {
-                "id": 13,
-                "review_text": "Very patient and thorough explanations.",
-                "author_email": "",
-                "time": "Just now"
-            },
-            {
-                "id": 14,
-                "review_text": "Helped me prepare for exams effectively.",
-                "author_email": "",
-                "time": "Just now"
-            }
-        ]
-    }
-
-
-# --------------------------------------------------
-# DEFAULT TUTOR RATINGS
-# --------------------------------------------------
-# These preserve the starting values already shown in your UI.
-def get_default_tutor_rating_data():
-    return {
-        "Michael Brown": {"total": 4.8, "count": 1, "by_user": {}},
-        "Samantha Green": {"total": 4.7, "count": 1, "by_user": {}},
-        "Alice Susan": {"total": 4.7, "count": 1, "by_user": {}},
-        "Jane Doe": {"total": 4.9, "count": 1, "by_user": {}},
-        "John Smith": {"total": 4.8, "count": 1, "by_user": {}},
-        "David Wilson": {"total": 4.8, "count": 1, "by_user": {}},
-        "Emily Lee": {"total": 4.9, "count": 1, "by_user": {}}
-    }
-
-
-# --------------------------------------------------
-# DEFAULT TUTOR AVAILABILITY
-# --------------------------------------------------
-def get_default_tutor_availability():
-    return {
-        "Michael Brown": [
-            "Monday 10:00 AM",
-            "Wednesday 1:00 PM",
-            "Thursday 3:00 PM"
-        ],
-        "Samantha Green": [
-            "Tuesday 11:00 AM",
-            "Thursday 2:00 PM",
-            "Friday 4:00 PM"
-        ],
-        "Alice Susan": [
-            "Monday 12:00 PM",
-            "Wednesday 4:00 PM",
-            "Friday 10:00 AM"
-        ],
-        "Jane Doe": [
-            "Tuesday 1:00 PM",
-            "Thursday 11:00 AM",
-            "Friday 2:00 PM"
-        ],
-        "John Smith": [
-            "Monday 3:00 PM",
-            "Wednesday 10:00 AM",
-            "Friday 12:00 PM"
-        ],
-        "David Wilson": [
-            "Tuesday 9:00 AM",
-            "Thursday 1:00 PM",
-            "Friday 3:00 PM"
-        ],
-        "Emily Lee": [
-            "Monday 11:00 AM",
-            "Wednesday 2:00 PM",
-            "Thursday 4:00 PM"
-        ]
-    }
-
-
-# --------------------------------------------------
-# SAVE DATA TO JSON
-# --------------------------------------------------
-def save_data():
-    data = {
-        "discussions_data": discussions_data,
-        "next_discussion_id": next_discussion_id,
-        "next_reply_id": next_reply_id,
-        "tutor_reviews": tutor_reviews,
-        "next_tutor_review_id": next_tutor_review_id,
-        "tutor_rating_data": tutor_rating_data,
-        "tutor_availability": tutor_availability,
-        "tutor_bookings": tutor_bookings
-    }
-
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
-
-
-# --------------------------------------------------
-# CLEAN / MIGRATE LOADED DATA
-# --------------------------------------------------
-def migrate_loaded_data():
-    global discussions_data, tutor_reviews, next_tutor_review_id
-    global tutor_rating_data, tutor_availability, tutor_bookings
-
-    # Make sure discussions always have needed keys
-    for discussion in discussions_data:
-        if "author_email" not in discussion:
-            discussion["author_email"] = ""
-        if "liked_by" not in discussion:
-            discussion["liked_by"] = []
-        if "fins_up" not in discussion:
-            discussion["fins_up"] = len(discussion["liked_by"])
-        if "replies" not in discussion:
-            discussion["replies"] = []
-
-        for reply in discussion.get("replies", []):
-            if "author_email" not in reply:
-                reply["author_email"] = ""
-            if "liked_by" not in reply:
-                reply["liked_by"] = []
-            if "fins_up" not in reply:
-                reply["fins_up"] = len(reply["liked_by"])
-
-    # Reviews
-    default_reviews = get_default_tutor_reviews()
-
-    if not isinstance(tutor_reviews, dict):
-        tutor_reviews = default_reviews
-    else:
-        for tutor_name, reviews in default_reviews.items():
-            if tutor_name not in tutor_reviews:
-                tutor_reviews[tutor_name] = reviews
-
-    max_review_id = 0
-    for review_list in tutor_reviews.values():
-        for review in review_list:
-            if "id" not in review:
-                max_review_id += 1
-                review["id"] = max_review_id
-            else:
-                max_review_id = max(max_review_id, review["id"])
-
-            if "review_text" not in review:
-                review["review_text"] = ""
-            if "author_email" not in review:
-                review["author_email"] = ""
-            if "time" not in review:
-                review["time"] = "Just now"
-
-    if next_tutor_review_id <= max_review_id:
-        next_tutor_review_id = max_review_id + 1
-
-    # Ratings
-    default_ratings = get_default_tutor_rating_data()
-
-    if not isinstance(tutor_rating_data, dict):
-        tutor_rating_data = default_ratings
-    else:
-        for tutor_name, rating_info in default_ratings.items():
-            if tutor_name not in tutor_rating_data:
-                tutor_rating_data[tutor_name] = rating_info
-            else:
-                tutor_rating_data[tutor_name].setdefault("total", rating_info["total"])
-                tutor_rating_data[tutor_name].setdefault("count", rating_info["count"])
-                tutor_rating_data[tutor_name].setdefault("by_user", {})
-
-    # Availability
-    default_availability = get_default_tutor_availability()
-
-    if not isinstance(tutor_availability, dict):
-        tutor_availability = default_availability
-    else:
-        for tutor_name, slots in default_availability.items():
-            if tutor_name not in tutor_availability:
-                tutor_availability[tutor_name] = slots
-
-    # Bookings
-    if not isinstance(tutor_bookings, dict):
-        tutor_bookings = {}
-
-    for tutor_name in default_availability.keys():
-        tutor_bookings.setdefault(tutor_name, [])
-
-
-# --------------------------------------------------
-# LOAD DATA FROM JSON
-# --------------------------------------------------
-def load_data():
-    global discussions_data, next_discussion_id, next_reply_id
-    global tutor_reviews, next_tutor_review_id
-    global tutor_rating_data, tutor_availability, tutor_bookings
-
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        discussions_data = data.get("discussions_data", [])
-        next_discussion_id = data.get("next_discussion_id", 1)
-        next_reply_id = data.get("next_reply_id", 1)
-
-        tutor_reviews = data.get("tutor_reviews", get_default_tutor_reviews())
-        next_tutor_review_id = data.get("next_tutor_review_id", 1)
-
-        tutor_rating_data = data.get("tutor_rating_data", get_default_tutor_rating_data())
-        tutor_availability = data.get("tutor_availability", get_default_tutor_availability())
-        tutor_bookings = data.get("tutor_bookings", {})
-
-        migrate_loaded_data()
-    else:
-        discussions_data = []
-        next_discussion_id = 1
-        next_reply_id = 1
-
-        tutor_reviews = get_default_tutor_reviews()
-        next_tutor_review_id = 15
-
-        tutor_rating_data = get_default_tutor_rating_data()
-        tutor_availability = get_default_tutor_availability()
-        tutor_bookings = {name: [] for name in tutor_availability.keys()}
-
+def get_db():
+    conn = sqlite3.connect(DB)
+    conn.row_factory = sqlite3.Row  # lets you access columns by name
+    return conn
 
 # --------------------------------------------------
 # RUNTIME SCRIPT INJECTION FOR ORIGINAL discussions.html
@@ -1191,44 +845,50 @@ def get_discussions():
         return jsonify({"error": "Unauthorized"}), 401
 
     major = request.args.get("major")
-
     if not major:
         return jsonify({"error": "Major is required"}), 400
 
-    filtered = [d for d in discussions_data if d["major"] == major]
-    return jsonify(filtered), 200
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT * FROM discussions WHERE major = ? ORDER BY created_at DESC",
+        (major,)
+    ).fetchall()
 
+    result = []
+    for row in rows:
+        d = dict(row)
+        replies = conn.execute(
+            "SELECT * FROM replies WHERE discussion_id = ?", (d["id"],)
+        ).fetchall()
+        d["replies"] = [dict(r) for r in replies]
+        d["time"] = d["created_at"]  # so the frontend still works
+        result.append(d)
+
+    conn.close()
+    return jsonify(result), 200
 
 @app.route("/api/discussions", methods=["POST"])
 def create_discussion():
-    global next_discussion_id
-
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     data = request.get_json()
-
     if not data or not data.get("major") or not data.get("question"):
         return jsonify({"error": "Missing data"}), 400
 
-    user_email = session["user"]
+    conn = get_db()
+    # save the student email if we haven't seen them before
+    conn.execute("INSERT OR IGNORE INTO students (email) VALUES (?)", (session["user"],))
+    cur = conn.execute(
+        "INSERT INTO discussions (major, title, author_email, fins_up) VALUES (?, ?, ?, 0)",
+        (data["major"], data["question"], session["user"])
+    )
+    conn.commit()
 
-    new_discussion = {
-        "id": next_discussion_id,
-        "major": data["major"],
-        "title": data["question"],
-        "time": "Just now",
-        "author_email": user_email,
-        "liked_by": [],
-        "fins_up": 0,
-        "replies": []
-    }
+    new_id = cur.lastrowid
+    conn.close()
 
-    discussions_data.append(new_discussion)
-    next_discussion_id += 1
-    save_data()
-
-    return jsonify(new_discussion), 201
+    return jsonify({"id": new_id, "title": data["question"], "time": "Just now", "fins_up": 0, "replies": []}), 201
 
 
 @app.route("/api/discussions/toggle_like", methods=["POST"])
@@ -1286,35 +946,22 @@ def delete_discussion(discussion_id):
 
 @app.route("/api/replies", methods=["POST"])
 def create_reply():
-    global next_reply_id
-
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     data = request.get_json()
-
     if not data or not data.get("discussion_id") or not data.get("reply_text"):
         return jsonify({"error": "Missing data"}), 400
 
-    discussion_id = data["discussion_id"]
-    user_email = session["user"]
+    conn = get_db()
+    cur = conn.execute(
+        "INSERT INTO replies (discussion_id, reply_text, author_email) VALUES (?, ?, ?)",
+        (data["discussion_id"], data["reply_text"], session["user"])
+    )
+    conn.commit()
+    conn.close()
 
-    new_reply = {
-        "id": next_reply_id,
-        "reply_text": data["reply_text"],
-        "author_email": user_email,
-        "liked_by": [],
-        "fins_up": 0
-    }
-
-    for discussion in discussions_data:
-        if discussion["id"] == discussion_id:
-            discussion["replies"].append(new_reply)
-            next_reply_id += 1
-            save_data()
-            return jsonify(new_reply), 201
-
-    return jsonify({"error": "Discussion not found"}), 404
+    return jsonify({"id": cur.lastrowid, "reply_text": data["reply_text"]}), 201
 
 
 @app.route("/api/replies/toggle_like", methods=["POST"])
@@ -1561,5 +1208,4 @@ def create_tutor_booking():
 # START SERVER
 # --------------------------------------------------
 if __name__ == "__main__":
-    load_data()
     app.run(host="0.0.0.0", port=5000, debug=True)
