@@ -9,58 +9,78 @@
 </head>
 <body>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="welcome-message">
-            <h1>SharkNet Discussions</h1>
-            <p>Join conversations and help each other learn.</p>
-        </div>
-        <nav class="nav-buttons">
-            <button onclick="location.href='home.html'">Home</button>
-            <button onclick="location.href='discussions.html'">Discussions</button>
-            <button onclick="location.href='tutors.html'">Tutors</button>
-        </nav>
-    </header>
+<!-- Header -->
+<header class="header">
+    <div class="welcome-message">
+        <h1>SharkNet Discussions</h1>
+        <p>Join conversations and help each other learn.</p>
+    </div>
+    <nav class="nav-buttons">
+        <button onclick="location.href='home.html'">Home</button>
+        <button onclick="location.href='discussions.html'">Discussions</button>
+        <button onclick="location.href='tutors.html'">Tutors</button>
+    </nav>
+</header>
 
-    <main>
+<main>
 
-        <!-- Majors Grid -->
-        <section class="majors-section" id="majors-section">
-            <h2 class="section-title">Browse by Major</h2>
-            <div class="majors-grid">
-                <div class="major-card" onclick="location.href='discussions.html?major=Computer+Science'">Computer Science</div>
-                <div class="major-card" onclick="location.href='discussions.html?major=Biology'">Biology</div>
-                <div class="major-card" onclick="location.href='discussions.html?major=Psychology'">Psychology</div>
-                <div class="major-card" onclick="location.href='discussions.html?major=Engineering'">Engineering</div>
-                <div class="major-card" onclick="location.href='discussions.html?major=Business'">Business</div>
-                <div class="major-card" onclick="location.href='discussions.html?major=Nursing'">Nursing</div>
-                <div class="major-card coming-soon">More majors coming soon...</div>
+    <!-- Campus Conversations Section (main page only) -->
+    <section class="campus-conversations-section" id="campus-conversations">
+        <h2 class="section-title">Campus Conversations</h2>
+        <div class="conversations-grid">
+            <div class="conversation-card" onclick="location.href='discussions.html?major=Campus'">
+                Join Discussion
             </div>
-        </section>
+        </div>
+    </section>
 
-    </main>
+    <!-- Majors Grid -->
+    <section class="majors-section" id="majors-section">
+        <h2 class="section-title">Browse by Major</h2>
+        <div class="majors-grid">
+            <div class="major-card" onclick="location.href='discussions.html?major=Biology'">Biology</div>
+            <div class="major-card" onclick="location.href='discussions.html?major=Business'">Business</div>
+            <div class="major-card" onclick="location.href='discussions.html?major=Computer+Science'">Computer Science</div>
+            <div class="major-card" onclick="location.href='discussions.html?major=Engineering'">Engineering</div>
+            <div class="major-card" onclick="location.href='discussions.html?major=Nursing'">Nursing</div>
+            <div class="major-card" onclick="location.href='discussions.html?major=Psychology'">Psychology</div>
+            <div class="major-card coming-soon">More majors coming soon...</div>
+        </div>
+    </section>
 
-    <footer>
-        <p>&copy; 2026 SharkNet • Prototype</p>
-    </footer>
+</main>
 
+<footer>
+    <p>&copy; 2026 SharkNet • Prototype</p>
+</footer>
+
+<!-- Discussions Subpage Logic -->
 <script>
 const params = new URLSearchParams(window.location.search);
 const major = params.get("major");
 
+// Hide Campus Conversations and Majors Grid on subpages
 if (major) {
-    const main = document.querySelector('main');
-    document.getElementById("majors-section").style.display = "none";
+    const campusSection = document.getElementById("campus-conversations");
+    if (campusSection) campusSection.style.display = "none";
 
+    const majorsSection = document.getElementById("majors-section");
+    if (majorsSection) majorsSection.style.display = "none";
+
+    const main = document.querySelector('main');
+
+    // Page title
     const pageTitle = document.createElement("h2");
     pageTitle.textContent = major + " Discussions";
     pageTitle.className = "section-title";
 
+    // Back button
     const backBtn = document.createElement("button");
     backBtn.textContent = "← Back";
     backBtn.className = "back-btn";
     backBtn.onclick = () => location.href = 'discussions.html';
 
+    // Top bar container
     const topBar = document.createElement("div");
     topBar.className = "top-bar";
     topBar.appendChild(backBtn);
@@ -68,10 +88,22 @@ if (major) {
 
     main.prepend(topBar);
 
+    // Create the discussion section container
     const discussionSection = document.createElement("section");
     discussionSection.className = "discussion-section";
     main.appendChild(discussionSection);
 
+    // Add the create post box as first element
+    const createPostCard = document.createElement("div");
+    createPostCard.className = "discussion-card create-post-card";
+    createPostCard.innerHTML = `
+        <div class="create-post-title">Create a discussion</div>
+        <textarea placeholder="Write your question here..." class="create-post-text"></textarea>
+        <button class="post-new-btn">Post</button>
+    `;
+    discussionSection.appendChild(createPostCard);
+
+    // Example discussion cards
     const exampleDiscussion = {
         title: "This is what an example question would look like.",
         time: "Just now",
