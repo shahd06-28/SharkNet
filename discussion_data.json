@@ -225,9 +225,11 @@
             }
         },
         "Samantha Green": {
-            "total": 4.7,
-            "count": 1,
-            "by_user": {}
+            "total": 7.7,
+            "count": 2,
+            "by_user": {
+                "sd2383@mynsu.nova.edu": 3
+            }
         },
         "Alice Susan": {
             "total": 7.699999999999999,
@@ -320,5 +322,6 @@
         "John Smith": [],
         "David Wilson": [],
         "Emily Lee": []
-    }
+    },
+    "tutor_requests": []
 }
