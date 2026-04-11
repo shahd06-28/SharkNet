@@ -2,367 +2,25 @@ from flask import Flask, send_from_directory, request, redirect, session, jsonif
 import os
 import json
 import re
-
+import sqlite3
+ 
 app = Flask(__name__)
 app.secret_key = "sharknet_secret_key"
-
+ 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UI_DIR = os.path.join(BASE_DIR, "UI")
-DATA_FILE = os.path.join(BASE_DIR, "discussion_data.json")
-
-# --------------------------------------------------
-# DATA STORAGE
-# --------------------------------------------------
-# Discussions data
-discussions_data = []
-next_discussion_id = 1
-next_reply_id = 1
-
-# Tutor reviews
-tutor_reviews = {}
-next_tutor_review_id = 1
-
-# Tutor ratings
-# Stored as:
-# {
-#   "Jane Doe": {
-#       "total": 4.9,
-#       "count": 1,
-#       "by_user": {
-#           "student@mynsu.nova.edu": 5
-#       }
-#   }
-# }
-tutor_rating_data = {}
-
-# Tutor availability
-# Stored as:
-# {
-#   "Jane Doe": ["Monday 10:00 AM", "Tuesday 2:00 PM", ...]
-# }
-tutor_availability = {}
-
-# Tutor bookings
-# Stored as:
-# {
-#   "Jane Doe": [
-#       {
-#           "student_email": "student@mynsu.nova.edu",
-#           "slot": "Monday 10:00 AM"
-#       }
-#   ]
-# }
-tutor_bookings = {}
-
-
-# --------------------------------------------------
-# DEFAULT TUTOR REVIEWS
-# --------------------------------------------------
-def get_default_tutor_reviews():
-    return {
-        "Jane Doe": [
-            {
-                "id": 1,
-                "review_text": "Super clear explanations!",
-                "author_email": "",
-                "time": "Just now"
-            },
-            {
-                "id": 2,
-                "review_text": "Helped me debug my projects.",
-                "author_email": "",
-                "time": "Just now"
-            }
-        ],
-        "Alice Susan": [
-            {
-                "id": 3,
-                "review_text": "Helped me understand SQL queries.",
-                "author_email": "",
-                "time": "Just now"
-            },
-            {
-                "id": 4,
-                "review_text": "Super friendly and patient.",
-                "author_email": "",
-                "time": "Just now"
-            }
-        ],
-        "Michael Brown": [
-            {
-                "id": 5,
-                "review_text": "Explains concepts in a really understandable way.",
-                "author_email": "",
-                "time": "Just now"
-            },
-            {
-                "id": 6,
-                "review_text": "Great study tips for exams!",
-                "author_email": "",
-                "time": "Just now"
-            }
-        ],
-        "Emily Lee": [
-            {
-                "id": 7,
-                "review_text": "Helped me improve my research paper.",
-                "author_email": "",
-                "time": "Just now"
-            },
-            {
-                "id": 8,
-                "review_text": "Very knowledgeable and patient.",
-                "author_email": "",
-                "time": "Just now"
-            }
-        ],
-        "John Smith": [
-            {
-                "id": 9,
-                "review_text": "Great explanations for complex engineering topics.",
-                "author_email": "",
-                "time": "Just now"
-            },
-            {
-                "id": 10,
-                "review_text": "Helped me understand lab experiments.",
-                "author_email": "",
-                "time": "Just now"
-            }
-        ],
-        "Samantha Green": [
-            {
-                "id": 11,
-                "review_text": "Explains finance concepts clearly.",
-                "author_email": "",
-                "time": "Just now"
-            },
-            {
-                "id": 12,
-                "review_text": "Helped me with my marketing assignment.",
-                "author_email": "",
-                "time": "Just now"
-            }
-        ],
-        "David Wilson": [
-            {
-                "id": 13,
-                "review_text": "Very patient and thorough explanations.",
-                "author_email": "",
-                "time": "Just now"
-            },
-            {
-                "id": 14,
-                "review_text": "Helped me prepare for exams effectively.",
-                "author_email": "",
-                "time": "Just now"
-            }
-        ]
-    }
-
-
-# --------------------------------------------------
-# DEFAULT TUTOR RATINGS
-# --------------------------------------------------
-# These preserve the starting values already shown in your UI.
-def get_default_tutor_rating_data():
-    return {
-        "Michael Brown": {"total": 4.8, "count": 1, "by_user": {}},
-        "Samantha Green": {"total": 4.7, "count": 1, "by_user": {}},
-        "Alice Susan": {"total": 4.7, "count": 1, "by_user": {}},
-        "Jane Doe": {"total": 4.9, "count": 1, "by_user": {}},
-        "John Smith": {"total": 4.8, "count": 1, "by_user": {}},
-        "David Wilson": {"total": 4.8, "count": 1, "by_user": {}},
-        "Emily Lee": {"total": 4.9, "count": 1, "by_user": {}}
-    }
-
-
-# --------------------------------------------------
-# DEFAULT TUTOR AVAILABILITY
-# --------------------------------------------------
-def get_default_tutor_availability():
-    return {
-        "Michael Brown": [
-            "Monday 10:00 AM",
-            "Wednesday 1:00 PM",
-            "Thursday 3:00 PM"
-        ],
-        "Samantha Green": [
-            "Tuesday 11:00 AM",
-            "Thursday 2:00 PM",
-            "Friday 4:00 PM"
-        ],
-        "Alice Susan": [
-            "Monday 12:00 PM",
-            "Wednesday 4:00 PM",
-            "Friday 10:00 AM"
-        ],
-        "Jane Doe": [
-            "Tuesday 1:00 PM",
-            "Thursday 11:00 AM",
-            "Friday 2:00 PM"
-        ],
-        "John Smith": [
-            "Monday 3:00 PM",
-            "Wednesday 10:00 AM",
-            "Friday 12:00 PM"
-        ],
-        "David Wilson": [
-            "Tuesday 9:00 AM",
-            "Thursday 1:00 PM",
-            "Friday 3:00 PM"
-        ],
-        "Emily Lee": [
-            "Monday 11:00 AM",
-            "Wednesday 2:00 PM",
-            "Thursday 4:00 PM"
-        ]
-    }
-
-
-# --------------------------------------------------
-# SAVE DATA TO JSON
-# --------------------------------------------------
+ 
+DB = os.path.join(BASE_DIR, "sharknet.db")
+ 
+def get_db():
+    conn = sqlite3.connect(DB)
+    conn.row_factory = sqlite3.Row  # lets you access columns by name
+    return conn
+ 
+# tutor routes still use this - keeping it so they don't crash
 def save_data():
-    data = {
-        "discussions_data": discussions_data,
-        "next_discussion_id": next_discussion_id,
-        "next_reply_id": next_reply_id,
-        "tutor_reviews": tutor_reviews,
-        "next_tutor_review_id": next_tutor_review_id,
-        "tutor_rating_data": tutor_rating_data,
-        "tutor_availability": tutor_availability,
-        "tutor_bookings": tutor_bookings
-    }
-
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
-
-
-# --------------------------------------------------
-# CLEAN / MIGRATE LOADED DATA
-# --------------------------------------------------
-def migrate_loaded_data():
-    global discussions_data, tutor_reviews, next_tutor_review_id
-    global tutor_rating_data, tutor_availability, tutor_bookings
-
-    # Make sure discussions always have needed keys
-    for discussion in discussions_data:
-        if "author_email" not in discussion:
-            discussion["author_email"] = ""
-        if "liked_by" not in discussion:
-            discussion["liked_by"] = []
-        if "fins_up" not in discussion:
-            discussion["fins_up"] = len(discussion["liked_by"])
-        if "replies" not in discussion:
-            discussion["replies"] = []
-
-        for reply in discussion.get("replies", []):
-            if "author_email" not in reply:
-                reply["author_email"] = ""
-            if "liked_by" not in reply:
-                reply["liked_by"] = []
-            if "fins_up" not in reply:
-                reply["fins_up"] = len(reply["liked_by"])
-
-    # Reviews
-    default_reviews = get_default_tutor_reviews()
-
-    if not isinstance(tutor_reviews, dict):
-        tutor_reviews = default_reviews
-    else:
-        for tutor_name, reviews in default_reviews.items():
-            if tutor_name not in tutor_reviews:
-                tutor_reviews[tutor_name] = reviews
-
-    max_review_id = 0
-    for review_list in tutor_reviews.values():
-        for review in review_list:
-            if "id" not in review:
-                max_review_id += 1
-                review["id"] = max_review_id
-            else:
-                max_review_id = max(max_review_id, review["id"])
-
-            if "review_text" not in review:
-                review["review_text"] = ""
-            if "author_email" not in review:
-                review["author_email"] = ""
-            if "time" not in review:
-                review["time"] = "Just now"
-
-    if next_tutor_review_id <= max_review_id:
-        next_tutor_review_id = max_review_id + 1
-
-    # Ratings
-    default_ratings = get_default_tutor_rating_data()
-
-    if not isinstance(tutor_rating_data, dict):
-        tutor_rating_data = default_ratings
-    else:
-        for tutor_name, rating_info in default_ratings.items():
-            if tutor_name not in tutor_rating_data:
-                tutor_rating_data[tutor_name] = rating_info
-            else:
-                tutor_rating_data[tutor_name].setdefault("total", rating_info["total"])
-                tutor_rating_data[tutor_name].setdefault("count", rating_info["count"])
-                tutor_rating_data[tutor_name].setdefault("by_user", {})
-
-    # Availability
-    default_availability = get_default_tutor_availability()
-
-    if not isinstance(tutor_availability, dict):
-        tutor_availability = default_availability
-    else:
-        for tutor_name, slots in default_availability.items():
-            if tutor_name not in tutor_availability:
-                tutor_availability[tutor_name] = slots
-
-    # Bookings
-    if not isinstance(tutor_bookings, dict):
-        tutor_bookings = {}
-
-    for tutor_name in default_availability.keys():
-        tutor_bookings.setdefault(tutor_name, [])
-
-
-# --------------------------------------------------
-# LOAD DATA FROM JSON
-# --------------------------------------------------
-def load_data():
-    global discussions_data, next_discussion_id, next_reply_id
-    global tutor_reviews, next_tutor_review_id
-    global tutor_rating_data, tutor_availability, tutor_bookings
-
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        discussions_data = data.get("discussions_data", [])
-        next_discussion_id = data.get("next_discussion_id", 1)
-        next_reply_id = data.get("next_reply_id", 1)
-
-        tutor_reviews = data.get("tutor_reviews", get_default_tutor_reviews())
-        next_tutor_review_id = data.get("next_tutor_review_id", 1)
-
-        tutor_rating_data = data.get("tutor_rating_data", get_default_tutor_rating_data())
-        tutor_availability = data.get("tutor_availability", get_default_tutor_availability())
-        tutor_bookings = data.get("tutor_bookings", {})
-
-        migrate_loaded_data()
-    else:
-        discussions_data = []
-        next_discussion_id = 1
-        next_reply_id = 1
-
-        tutor_reviews = get_default_tutor_reviews()
-        next_tutor_review_id = 15
-
-        tutor_rating_data = get_default_tutor_rating_data()
-        tutor_availability = get_default_tutor_availability()
-        tutor_bookings = {name: [] for name in tutor_availability.keys()}
-
-
+    pass
+ 
 # --------------------------------------------------
 # RUNTIME SCRIPT INJECTION FOR ORIGINAL discussions.html
 # --------------------------------------------------
@@ -371,31 +29,31 @@ DISCUSSIONS_RUNTIME_SCRIPT = r"""
 const params = new URLSearchParams(window.location.search);
 const major = params.get("major");
 const currentUserEmail = {{CURRENT_USER_EMAIL_JSON}};
-
+ 
 const openDiscussionIds = new Set();
-
+ 
 function escapeHtml(value) {
     const div = document.createElement("div");
     div.textContent = value ?? "";
     return div.innerHTML;
 }
-
+ 
 function createReplyElement(reply, discussionId) {
     const replyDiv = document.createElement("div");
     replyDiv.className = "reply";
     replyDiv.dataset.replyId = reply.id;
-
+ 
     const replyText = document.createElement("span");
     replyText.className = "reply-text";
     replyText.textContent = reply.reply_text;
-
+ 
     const finsSpan = document.createElement("span");
     finsSpan.className = "fins-up reply-fins-up";
     finsSpan.dataset.replyId = reply.id;
     finsSpan.style.cursor = "pointer";
     finsSpan.style.marginLeft = "10px";
     finsSpan.innerHTML = `<img src="../images/fin.png" alt="Shark Fin" class="fin-icon"> ${reply.fins_up || 0}`;
-
+ 
     finsSpan.addEventListener("click", async () => {
         try {
             const response = await fetch("/api/replies/toggle_like", {
@@ -408,67 +66,67 @@ function createReplyElement(reply, discussionId) {
                     reply_id: reply.id
                 })
             });
-
+ 
             const result = await response.json();
-
+ 
             if (!response.ok) {
                 alert(result.error || "Failed to update reply like.");
                 return;
             }
-
+ 
             finsSpan.innerHTML = `<img src="../images/fin.png" alt="Shark Fin" class="fin-icon"> ${result.fins_up}`;
-
+ 
         } catch (error) {
             console.error("Reply like error:", error);
             alert("An error occurred while updating the reply like.");
         }
     });
-
+ 
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "delete-reply-btn";
     deleteBtn.dataset.replyId = reply.id;
     deleteBtn.textContent = "Delete Reply";
-
+ 
     deleteBtn.addEventListener("click", async () => {
         try {
             const response = await fetch(`/api/replies/${reply.id}`, {
                 method: "DELETE"
             });
-
+ 
             const result = await response.json();
-
+ 
             if (!response.ok) {
                 alert(result.error || "Failed to delete reply.");
                 return;
             }
-
+ 
             replyDiv.remove();
-
+ 
             const repliesContainer = replyDiv.parentElement;
             if (repliesContainer && repliesContainer.children.length === 0) {
                 repliesContainer.innerHTML = '<div class="reply no-replies-placeholder">No replies yet.</div>';
             }
-
+ 
         } catch (error) {
             console.error("Delete reply error:", error);
             alert("An error occurred while deleting the reply.");
         }
     });
-
+ 
     replyDiv.appendChild(replyText);
     replyDiv.appendChild(finsSpan);
     replyDiv.appendChild(deleteBtn);
-
+ 
     return replyDiv;
 }
-
+ 
 function createDiscussionCard(d) {
     const card = document.createElement("div");
     card.className = "discussion-card";
     card.dataset.discussionId = d.id;
-
+ 
     const isOpen = openDiscussionIds.has(d.id);
-
+ 
     card.innerHTML = `
         <div class="card-header">
             <span class="timestamp">${escapeHtml(d.time)}</span>
@@ -476,21 +134,21 @@ function createDiscussionCard(d) {
                 <img src="../images/fin.png" alt="Shark Fin" class="fin-icon"> ${d.fins_up || 0}
             </span>
         </div>
-
+ 
         <p class="question-text">${escapeHtml(d.title)}</p>
-
+ 
         <div class="card-actions-row">
             <button class="reply-btn">${isOpen ? "Hide Replies" : "View Replies"}</button>
             <button class="delete-btn">Delete Post</button>
         </div>
-
+ 
         <div class="reply-box ${isOpen ? "" : "hidden"}">
             <div class="existing-replies"></div>
             <textarea placeholder="Write a reply..."></textarea>
             <button class="post-reply">Post Reply</button>
         </div>
     `;
-
+ 
     const discussionFinsUp = card.querySelector(".discussion-fins-up");
     const replyBtn = card.querySelector(".reply-btn");
     const deleteBtn = card.querySelector(".delete-btn");
@@ -498,11 +156,11 @@ function createDiscussionCard(d) {
     const existingReplies = card.querySelector(".existing-replies");
     const textarea = card.querySelector("textarea");
     const postReplyBtn = card.querySelector(".post-reply");
-
+ 
     if (d.author_email && d.author_email !== currentUserEmail) {
         deleteBtn.style.display = "none";
     }
-
+ 
     if (d.replies && d.replies.length > 0) {
         d.replies.forEach(reply => {
             existingReplies.appendChild(createReplyElement(reply, d.id));
@@ -510,10 +168,10 @@ function createDiscussionCard(d) {
     } else {
         existingReplies.innerHTML = '<div class="reply no-replies-placeholder">No replies yet.</div>';
     }
-
+ 
     replyBtn.addEventListener("click", () => {
         replyBox.classList.toggle("hidden");
-
+ 
         if (replyBox.classList.contains("hidden")) {
             openDiscussionIds.delete(d.id);
             replyBtn.textContent = "View Replies";
@@ -522,7 +180,7 @@ function createDiscussionCard(d) {
             replyBtn.textContent = "Hide Replies";
         }
     });
-
+ 
     discussionFinsUp.addEventListener("click", async () => {
         try {
             const response = await fetch("/api/discussions/toggle_like", {
@@ -534,38 +192,38 @@ function createDiscussionCard(d) {
                     discussion_id: d.id
                 })
             });
-
+ 
             const result = await response.json();
-
+ 
             if (!response.ok) {
                 alert(result.error || "Failed to update like.");
                 return;
             }
-
+ 
             discussionFinsUp.innerHTML = `<img src="../images/fin.png" alt="Shark Fin" class="fin-icon"> ${result.fins_up}`;
-
+ 
         } catch (error) {
             console.error("Discussion like error:", error);
             alert("An error occurred while updating the like.");
         }
     });
-
+ 
     deleteBtn.addEventListener("click", async () => {
         try {
             const response = await fetch(`/api/discussions/${d.id}`, {
                 method: "DELETE"
             });
-
+ 
             const result = await response.json();
-
+ 
             if (!response.ok) {
                 alert(result.error || "Failed to delete post.");
                 return;
             }
-
+ 
             openDiscussionIds.delete(d.id);
             card.remove();
-
+ 
             const discussionSection = document.querySelector(".discussion-section.discussion-list");
             if (discussionSection && discussionSection.children.length === 0) {
                 const emptyCard = document.createElement("div");
@@ -581,21 +239,21 @@ function createDiscussionCard(d) {
                 `;
                 discussionSection.appendChild(emptyCard);
             }
-
+ 
         } catch (error) {
             console.error("Delete post error:", error);
             alert("An error occurred while deleting the post.");
         }
     });
-
+ 
     postReplyBtn.addEventListener("click", async () => {
         const replyText = textarea.value.trim();
-
+ 
         if (!replyText) {
             alert("Please write a reply first.");
             return;
         }
-
+ 
         try {
             const response = await fetch("/api/replies", {
                 method: "POST",
@@ -607,55 +265,55 @@ function createDiscussionCard(d) {
                     reply_text: replyText
                 })
             });
-
+ 
             const result = await response.json();
-
+ 
             if (!response.ok) {
                 alert(result.error || "Failed to post reply.");
                 return;
             }
-
+ 
             const placeholder = existingReplies.querySelector(".no-replies-placeholder");
             if (placeholder) {
                 placeholder.remove();
             }
-
+ 
             existingReplies.appendChild(createReplyElement(result, d.id));
             textarea.value = "";
-
+ 
             openDiscussionIds.add(d.id);
             replyBox.classList.remove("hidden");
             replyBtn.textContent = "Hide Replies";
-
+ 
         } catch (error) {
             console.error("Reply error:", error);
             alert("An error occurred while posting the reply.");
         }
     });
-
+ 
     return card;
 }
-
+ 
 if (major) {
     const main = document.querySelector("main");
     document.getElementById("majors-section").style.display = "none";
-
+ 
     const pageTitle = document.createElement("h2");
     pageTitle.textContent = major + " Discussions";
     pageTitle.className = "section-title";
-
+ 
     const backBtn = document.createElement("button");
     backBtn.textContent = "← Back";
     backBtn.className = "back-btn";
     backBtn.onclick = () => location.href = "discussions.html";
-
+ 
     const topBar = document.createElement("div");
     topBar.className = "top-bar";
     topBar.appendChild(backBtn);
     topBar.appendChild(pageTitle);
-
+ 
     main.prepend(topBar);
-
+ 
     const askSection = document.createElement("section");
     askSection.className = "discussion-section";
     askSection.innerHTML = `
@@ -670,25 +328,25 @@ if (major) {
         </div>
     `;
     main.appendChild(askSection);
-
+ 
     const discussionSection = document.createElement("section");
     discussionSection.className = "discussion-section discussion-list";
     main.appendChild(discussionSection);
-
+ 
     async function loadDiscussions() {
         discussionSection.innerHTML = "";
-
+ 
         try {
             const response = await fetch(`/api/discussions?major=${encodeURIComponent(major)}`);
             const result = await response.json();
-
+ 
             if (!response.ok) {
                 alert(result.error || "Failed to load discussions.");
                 return;
             }
-
+ 
             const discussionData = result;
-
+ 
             if (discussionData.length === 0) {
                 const emptyCard = document.createElement("div");
                 emptyCard.className = "discussion-card";
@@ -704,25 +362,25 @@ if (major) {
                 discussionSection.appendChild(emptyCard);
                 return;
             }
-
+ 
             discussionData.forEach(d => {
                 discussionSection.appendChild(createDiscussionCard(d));
             });
-
+ 
         } catch (error) {
             console.error("Load discussions error:", error);
             alert("An error occurred while loading discussions.");
         }
     }
-
+ 
     document.getElementById("post-question-btn").addEventListener("click", async () => {
         const questionText = document.getElementById("new-question-text").value.trim();
-
+ 
         if (!questionText) {
             alert("Please write a question first.");
             return;
         }
-
+ 
         try {
             const response = await fetch("/api/discussions", {
                 method: "POST",
@@ -734,16 +392,16 @@ if (major) {
                     question: questionText
                 })
             });
-
+ 
             const result = await response.json();
-
+ 
             if (!response.ok) {
                 alert(result.error || "Failed to create question.");
                 return;
             }
-
+ 
             document.getElementById("new-question-text").value = "";
-
+ 
             const emptyCard = discussionSection.querySelector(".discussion-card");
             if (
                 emptyCard &&
@@ -752,39 +410,39 @@ if (major) {
             ) {
                 discussionSection.innerHTML = "";
             }
-
+ 
             openDiscussionIds.add(result.id);
             discussionSection.prepend(createDiscussionCard(result));
-
+ 
         } catch (error) {
             console.error("Create question error:", error);
             alert("An error occurred while creating the question.");
         }
     });
-
+ 
     loadDiscussions();
 }
 </script>
 """
-
-
+ 
+ 
 # --------------------------------------------------
 # RUNTIME SCRIPT INJECTION FOR ORIGINAL tutors.html
 # --------------------------------------------------
 TUTORS_RUNTIME_SCRIPT = r"""
 <script>
 const selectedTutorRatings = {};
-
+ 
 function createTutorReviewElement(review) {
     const reviewDiv = document.createElement("div");
     reviewDiv.className = "review";
     reviewDiv.textContent = `"${review.review_text}"`;
     return reviewDiv;
 }
-
+ 
 function ensureBookingBox(card) {
     let bookingBox = card.querySelector(".booking-box");
-
+ 
     if (!bookingBox) {
         bookingBox = document.createElement("div");
         bookingBox.className = "booking-box hidden";
@@ -793,99 +451,99 @@ function ensureBookingBox(card) {
             <div class="booking-slots"></div>
             <div class="booking-message"></div>
         `;
-
+ 
         const cardButtons = card.querySelector(".card-buttons");
         cardButtons.insertAdjacentElement("afterend", bookingBox);
     }
-
+ 
     return bookingBox;
 }
-
+ 
 function updateRatingText(card, average) {
     const ratingSpan = card.querySelector(".rating");
     ratingSpan.textContent = `⭐ ${average.toFixed(1)}`;
 }
-
+ 
 async function loadTutorReviews() {
     try {
         const response = await fetch("/api/tutors/reviews");
         const result = await response.json();
-
+ 
         if (!response.ok) {
             alert(result.error || "Failed to load tutor reviews.");
             return;
         }
-
+ 
         document.querySelectorAll(".tutor-card").forEach(card => {
             const tutorName = card.querySelector(".tutor-name").textContent.trim();
             const existingReviews = card.querySelector(".existing-reviews");
             const reviewList = result[tutorName] || [];
-
+ 
             existingReviews.innerHTML = "";
-
+ 
             reviewList.forEach(review => {
                 existingReviews.appendChild(createTutorReviewElement(review));
             });
         });
-
+ 
     } catch (error) {
         console.error("Load tutor reviews error:", error);
         alert("An error occurred while loading tutor reviews.");
     }
 }
-
+ 
 async function loadTutorRatings() {
     try {
         const response = await fetch("/api/tutors/ratings");
         const result = await response.json();
-
+ 
         if (!response.ok) {
             alert(result.error || "Failed to load tutor ratings.");
             return;
         }
-
+ 
         document.querySelectorAll(".tutor-card").forEach(card => {
             const tutorName = card.querySelector(".tutor-name").textContent.trim();
             const ratingInfo = result[tutorName];
-
+ 
             if (ratingInfo) {
                 updateRatingText(card, ratingInfo.average);
             }
         });
-
+ 
     } catch (error) {
         console.error("Load tutor ratings error:", error);
         alert("An error occurred while loading tutor ratings.");
     }
 }
-
+ 
 async function renderBookingSlots(card, tutorName) {
     const bookingBox = ensureBookingBox(card);
     const slotsContainer = bookingBox.querySelector(".booking-slots");
     const bookingMessage = bookingBox.querySelector(".booking-message");
-
+ 
     slotsContainer.innerHTML = "";
     bookingMessage.textContent = "";
-
+ 
     try {
         const response = await fetch(`/api/tutors/availability?tutor_name=${encodeURIComponent(tutorName)}`);
         const result = await response.json();
-
+ 
         if (!response.ok) {
             bookingMessage.textContent = result.error || "Failed to load availability.";
             return;
         }
-
+ 
         if (!result.available_slots || result.available_slots.length === 0) {
             bookingMessage.textContent = "No open times right now.";
             return;
         }
-
+ 
         result.available_slots.forEach(slot => {
             const slotButton = document.createElement("button");
             slotButton.className = "booking-slot-btn";
             slotButton.textContent = slot;
-
+ 
             slotButton.addEventListener("click", async () => {
                 try {
                     const bookResponse = await fetch("/api/tutors/bookings", {
@@ -898,32 +556,32 @@ async function renderBookingSlots(card, tutorName) {
                             slot: slot
                         })
                     });
-
+ 
                     const bookResult = await bookResponse.json();
-
+ 
                     if (!bookResponse.ok) {
                         bookingMessage.textContent = bookResult.error || "Failed to book session.";
                         return;
                     }
-
+ 
                     bookingMessage.textContent = `Booked: ${slot}`;
                     await renderBookingSlots(card, tutorName);
-
+ 
                 } catch (error) {
                     console.error("Booking error:", error);
                     bookingMessage.textContent = "An error occurred while booking.";
                 }
             });
-
+ 
             slotsContainer.appendChild(slotButton);
         });
-
+ 
     } catch (error) {
         console.error("Availability error:", error);
         bookingMessage.textContent = "An error occurred while loading availability.";
     }
 }
-
+ 
 document.querySelectorAll(".review-toggle").forEach(button => {
     button.addEventListener("click", () => {
         const reviewBox = button.closest(".tutor-card").querySelector(".review-box");
@@ -931,44 +589,44 @@ document.querySelectorAll(".review-toggle").forEach(button => {
         button.textContent = reviewBox.classList.contains("hidden") ? "View Reviews" : "Hide Reviews";
     });
 });
-
+ 
 document.querySelectorAll(".tutor-card").forEach(card => {
     const tutorName = card.querySelector(".tutor-name").textContent.trim();
     const stars = card.querySelectorAll(".star");
     const submitRatingBtn = card.querySelector(".submit-rating");
     const bookBtn = card.querySelector(".book-btn");
-
+ 
     let currentRating = 0;
-
+ 
     // Star hover/click behavior
     stars.forEach(star => {
         star.addEventListener("mouseover", () => {
             const val = parseInt(star.dataset.value);
             stars.forEach(s => s.classList.toggle("hovered", parseInt(s.dataset.value) <= val));
         });
-
+ 
         star.addEventListener("mouseout", () => {
             stars.forEach(s => s.classList.remove("hovered"));
             stars.forEach(s => s.classList.toggle("selected", parseInt(s.dataset.value) <= currentRating));
         });
-
+ 
         star.addEventListener("click", () => {
             currentRating = parseInt(star.dataset.value);
             selectedTutorRatings[tutorName] = currentRating;
             stars.forEach(s => s.classList.toggle("selected", parseInt(s.dataset.value) <= currentRating));
         });
     });
-
+ 
     // Rating submit button
     if (submitRatingBtn) {
     submitRatingBtn.addEventListener("click", async () => {
         const ratingValue = selectedTutorRatings[tutorName];
-
+ 
         if (!ratingValue) {
             alert("Please choose a star rating first.");
             return;
         }
-
+ 
         try {
             const response = await fetch("/api/tutors/ratings", {
                 method: "POST",
@@ -980,36 +638,36 @@ document.querySelectorAll(".tutor-card").forEach(card => {
                     rating: ratingValue
                 })
             });
-
+ 
             const result = await response.json();
-
+ 
             if (!response.ok) {
                 alert(result.error || "Failed to submit rating.");
                 return;
             }
-
+ 
             updateRatingText(card, result.average);
-
+ 
         } catch (error) {
             console.error("Submit rating error:", error);
             alert("An error occurred while submitting the rating.");
         }
     });
 }
-
+ 
     // Book session button
     if (bookBtn) {
         bookBtn.addEventListener("click", async () => {
             const bookingBox = ensureBookingBox(card);
             bookingBox.classList.toggle("hidden");
-
+ 
             if (!bookingBox.classList.contains("hidden")) {
                 await renderBookingSlots(card, tutorName);
             }
         });
     }
 });
-
+ 
 document.querySelectorAll(".post-review").forEach(button => {
     button.addEventListener("click", async () => {
         const tutorCard = button.closest(".tutor-card");
@@ -1017,12 +675,12 @@ document.querySelectorAll(".post-review").forEach(button => {
         const textarea = tutorCard.querySelector("textarea");
         const existingReviews = tutorCard.querySelector(".existing-reviews");
         const reviewText = textarea.value.trim();
-
+ 
         if (!reviewText) {
             alert("Please write a review first.");
             return;
         }
-
+ 
         try {
             const response = await fetch("/api/tutors/reviews", {
                 method: "POST",
@@ -1034,46 +692,46 @@ document.querySelectorAll(".post-review").forEach(button => {
                     review_text: reviewText
                 })
             });
-
+ 
             const result = await response.json();
-
+ 
             if (!response.ok) {
                 alert(result.error || "Failed to post review.");
                 return;
             }
-
+ 
             existingReviews.appendChild(createTutorReviewElement(result));
             textarea.value = "";
-
+ 
         } catch (error) {
             console.error("Post tutor review error:", error);
             alert("An error occurred while posting the review.");
         }
     });
 });
-
+ 
 loadTutorReviews();
 loadTutorRatings();
 </script>
 """
-
-
+ 
+ 
 # --------------------------------------------------
 # HTML INJECTION HELPERS
 # --------------------------------------------------
 def serve_discussions_with_runtime_script():
     file_path = os.path.join(UI_DIR, "discussions.html")
-
+ 
     with open(file_path, "r", encoding="utf-8") as f:
         html = f.read()
-
+ 
     current_user_email_json = json.dumps(session.get("user", ""))
-
+ 
     injected_script = DISCUSSIONS_RUNTIME_SCRIPT.replace(
         "{{CURRENT_USER_EMAIL_JSON}}",
         current_user_email_json
     )
-
+ 
     html = re.sub(
         r"<script>[\s\S]*?</script>\s*</body>",
         injected_script + "\n</body>",
@@ -1081,16 +739,16 @@ def serve_discussions_with_runtime_script():
         count=1,
         flags=re.IGNORECASE
     )
-
+ 
     return Response(html, mimetype="text/html")
-
-
+ 
+ 
 def serve_tutors_with_runtime_script():
     file_path = os.path.join(UI_DIR, "tutors.html")
-
+ 
     with open(file_path, "r", encoding="utf-8") as f:
         html = f.read()
-
+ 
     html = re.sub(
         r"<script>[\s\S]*?</script>\s*</body>",
         TUTORS_RUNTIME_SCRIPT + "\n</body>",
@@ -1098,18 +756,18 @@ def serve_tutors_with_runtime_script():
         count=1,
         flags=re.IGNORECASE
     )
-
+ 
     return Response(html, mimetype="text/html")
-
-
+ 
+ 
 # --------------------------------------------------
 # LOGIN PAGE
 # --------------------------------------------------
 @app.route("/")
 def login():
     return send_from_directory(UI_DIR, "login.html")
-
-
+ 
+ 
 # --------------------------------------------------
 # HOME PAGE
 # --------------------------------------------------
@@ -1119,8 +777,8 @@ def home():
     if "user" not in session:
         return redirect("/")
     return send_from_directory(UI_DIR, "home.html")
-
-
+ 
+ 
 # --------------------------------------------------
 # DISCUSSIONS PAGE
 # --------------------------------------------------
@@ -1130,8 +788,8 @@ def discussions():
     if "user" not in session:
         return redirect("/")
     return serve_discussions_with_runtime_script()
-
-
+ 
+ 
 # --------------------------------------------------
 # TUTORS PAGE
 # --------------------------------------------------
@@ -1141,38 +799,38 @@ def tutors():
     if "user" not in session:
         return redirect("/")
     return serve_tutors_with_runtime_script()
-
-
+ 
+ 
 # --------------------------------------------------
 # STATIC FILES
 # --------------------------------------------------
 @app.route("/css/<path:filename>")
 def css_files(filename):
     return send_from_directory("css", filename)
-
-
+ 
+ 
 @app.route("/images/<path:filename>")
 def image_files(filename):
     return send_from_directory("images", filename)
-
-
+ 
+ 
 # --------------------------------------------------
 # LOGIN PROCESS
 # --------------------------------------------------
 @app.route("/login", methods=["POST"])
 def login_process():
     email = request.form.get("email", "").strip().lower()
-
+ 
     if not email:
         return "Email is required", 400
-
+ 
     if not email.endswith("@mynsu.nova.edu"):
         return "Only NSU student emails allowed", 400
-
+ 
     session["user"] = email
     return redirect("/home.html")
-
-
+ 
+ 
 # --------------------------------------------------
 # LOGOUT
 # --------------------------------------------------
@@ -1180,8 +838,8 @@ def login_process():
 def logout():
     session.clear()
     return redirect("/")
-
-
+ 
+ 
 # --------------------------------------------------
 # DISCUSSION ROUTES
 # --------------------------------------------------
@@ -1189,194 +847,173 @@ def logout():
 def get_discussions():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
+ 
     major = request.args.get("major")
-
     if not major:
         return jsonify({"error": "Major is required"}), 400
-
-    filtered = [d for d in discussions_data if d["major"] == major]
-    return jsonify(filtered), 200
-
-
+ 
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT * FROM discussions WHERE major = ? ORDER BY created_at DESC",
+        (major,)
+    ).fetchall()
+ 
+    result = []
+    for row in rows:
+        d = dict(row)
+        replies = conn.execute(
+            "SELECT * FROM replies WHERE discussion_id = ?", (d["id"],)
+        ).fetchall()
+        d["replies"] = [dict(r) for r in replies]
+        d["time"] = d["created_at"]  # so the frontend still works
+        result.append(d)
+ 
+    conn.close()
+    return jsonify(result), 200
+ 
 @app.route("/api/discussions", methods=["POST"])
 def create_discussion():
-    global next_discussion_id
-
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
+ 
     data = request.get_json()
-
     if not data or not data.get("major") or not data.get("question"):
         return jsonify({"error": "Missing data"}), 400
-
-    user_email = session["user"]
-
-    new_discussion = {
-        "id": next_discussion_id,
-        "major": data["major"],
-        "title": data["question"],
-        "time": "Just now",
-        "author_email": user_email,
-        "liked_by": [],
-        "fins_up": 0,
-        "replies": []
-    }
-
-    discussions_data.append(new_discussion)
-    next_discussion_id += 1
-    save_data()
-
-    return jsonify(new_discussion), 201
-
-
+ 
+    conn = get_db()
+    # save the student email if we haven't seen them before
+    conn.execute("INSERT OR IGNORE INTO students (email) VALUES (?)", (session["user"],))
+    cur = conn.execute(
+        "INSERT INTO discussions (major, title, author_email, fins_up) VALUES (?, ?, ?, 0)",
+        (data["major"], data["question"], session["user"])
+    )
+    conn.commit()
+ 
+    new_id = cur.lastrowid
+    conn.close()
+ 
+    return jsonify({"id": new_id, "title": data["question"], "time": "Just now", "fins_up": 0, "replies": []}), 201
+ 
+ 
 @app.route("/api/discussions/toggle_like", methods=["POST"])
 def toggle_discussion_like():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
+ 
     data = request.get_json()
-
     if not data or not data.get("discussion_id"):
         return jsonify({"error": "discussion_id is required"}), 400
-
+ 
     discussion_id = data["discussion_id"]
-    user_email = session["user"]
-
-    for discussion in discussions_data:
-        if discussion["id"] == discussion_id:
-            liked_by = discussion.setdefault("liked_by", [])
-
-            if user_email in liked_by:
-                liked_by.remove(user_email)
-            else:
-                liked_by.append(user_email)
-
-            discussion["fins_up"] = len(liked_by)
-            save_data()
-
-            return jsonify({
-                "id": discussion["id"],
-                "fins_up": discussion["fins_up"],
-                "liked": user_email in liked_by
-            }), 200
-
-    return jsonify({"error": "Discussion not found"}), 404
-
-
+ 
+    conn = get_db()
+    row = conn.execute("SELECT * FROM discussions WHERE id = ?", (discussion_id,)).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({"error": "Discussion not found"}), 404
+ 
+    new_fins = (row["fins_up"] or 0) + 1
+    conn.execute("UPDATE discussions SET fins_up = ? WHERE id = ?", (new_fins, discussion_id))
+    conn.commit()
+    conn.close()
+ 
+    return jsonify({"id": discussion_id, "fins_up": new_fins}), 200
+ 
+ 
 @app.route("/api/discussions/<int:discussion_id>", methods=["DELETE"])
 def delete_discussion(discussion_id):
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
+ 
     user_email = session["user"]
-
-    for index, discussion in enumerate(discussions_data):
-        if discussion["id"] == discussion_id:
-            if discussion.get("author_email") != user_email:
-                return jsonify({"error": "You can only delete your own post"}), 403
-
-            discussions_data.pop(index)
-            save_data()
-            return jsonify({"success": True}), 200
-
-    return jsonify({"error": "Discussion not found"}), 404
-
-
+ 
+    conn = get_db()
+    row = conn.execute("SELECT * FROM discussions WHERE id = ?", (discussion_id,)).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({"error": "Discussion not found"}), 404
+ 
+    if row["author_email"] != user_email:
+        conn.close()
+        return jsonify({"error": "You can only delete your own post"}), 403
+ 
+    conn.execute("DELETE FROM replies WHERE discussion_id = ?", (discussion_id,))
+    conn.execute("DELETE FROM discussions WHERE id = ?", (discussion_id,))
+    conn.commit()
+    conn.close()
+ 
+    return jsonify({"success": True}), 200
+ 
+ 
 @app.route("/api/replies", methods=["POST"])
 def create_reply():
-    global next_reply_id
-
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
+ 
     data = request.get_json()
-
     if not data or not data.get("discussion_id") or not data.get("reply_text"):
         return jsonify({"error": "Missing data"}), 400
-
-    discussion_id = data["discussion_id"]
-    user_email = session["user"]
-
-    new_reply = {
-        "id": next_reply_id,
-        "reply_text": data["reply_text"],
-        "author_email": user_email,
-        "liked_by": [],
-        "fins_up": 0
-    }
-
-    for discussion in discussions_data:
-        if discussion["id"] == discussion_id:
-            discussion["replies"].append(new_reply)
-            next_reply_id += 1
-            save_data()
-            return jsonify(new_reply), 201
-
-    return jsonify({"error": "Discussion not found"}), 404
-
-
+ 
+    conn = get_db()
+    cur = conn.execute(
+        "INSERT INTO replies (discussion_id, reply_text, author_email) VALUES (?, ?, ?)",
+        (data["discussion_id"], data["reply_text"], session["user"])
+    )
+    conn.commit()
+    conn.close()
+ 
+    return jsonify({"id": cur.lastrowid, "reply_text": data["reply_text"]}), 201
+ 
+ 
 @app.route("/api/replies/toggle_like", methods=["POST"])
 def toggle_reply_like():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
+ 
     data = request.get_json()
-
-    if not data or not data.get("discussion_id") or not data.get("reply_id"):
-        return jsonify({"error": "discussion_id and reply_id are required"}), 400
-
-    discussion_id = data["discussion_id"]
+    if not data or not data.get("reply_id"):
+        return jsonify({"error": "reply_id is required"}), 400
+ 
     reply_id = data["reply_id"]
-    user_email = session["user"]
-
-    for discussion in discussions_data:
-        if discussion["id"] == discussion_id:
-            for reply in discussion.get("replies", []):
-                if reply["id"] == reply_id:
-                    liked_by = reply.setdefault("liked_by", [])
-
-                    if user_email in liked_by:
-                        liked_by.remove(user_email)
-                    else:
-                        liked_by.append(user_email)
-
-                    reply["fins_up"] = len(liked_by)
-                    save_data()
-
-                    return jsonify({
-                        "id": reply["id"],
-                        "fins_up": reply["fins_up"],
-                        "liked": user_email in liked_by
-                    }), 200
-
-            return jsonify({"error": "Reply not found"}), 404
-
-    return jsonify({"error": "Discussion not found"}), 404
-
-
+ 
+    conn = get_db()
+    row = conn.execute("SELECT * FROM replies WHERE id = ?", (reply_id,)).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({"error": "Reply not found"}), 404
+ 
+    new_fins = (row["fins_up"] or 0) + 1
+    conn.execute("UPDATE replies SET fins_up = ? WHERE id = ?", (new_fins, reply_id))
+    conn.commit()
+    conn.close()
+ 
+    return jsonify({"id": reply_id, "fins_up": new_fins}), 200
+ 
+ 
 @app.route("/api/replies/<int:reply_id>", methods=["DELETE"])
 def delete_reply(reply_id):
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
+ 
     user_email = session["user"]
-
-    for discussion in discussions_data:
-        replies = discussion.get("replies", [])
-        for index, reply in enumerate(replies):
-            if reply["id"] == reply_id:
-                if reply.get("author_email") != user_email:
-                    return jsonify({"error": "You can only delete your own reply"}), 403
-
-                replies.pop(index)
-                save_data()
-                return jsonify({"success": True}), 200
-
-    return jsonify({"error": "Reply not found"}), 404
-
-
+ 
+    conn = get_db()
+    row = conn.execute("SELECT * FROM replies WHERE id = ?", (reply_id,)).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({"error": "Reply not found"}), 404
+ 
+    if row["author_email"] != user_email:
+        conn.close()
+        return jsonify({"error": "You can only delete your own reply"}), 403
+ 
+    conn.execute("DELETE FROM replies WHERE id = ?", (reply_id,))
+    conn.commit()
+    conn.close()
+ 
+    return jsonify({"success": True}), 200
+ 
+ 
 # --------------------------------------------------
 # TUTOR REVIEW ROUTES
 # --------------------------------------------------
@@ -1384,45 +1021,45 @@ def delete_reply(reply_id):
 def get_tutor_reviews():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
+ 
     return jsonify(tutor_reviews), 200
-
-
+ 
+ 
 @app.route("/api/tutors/reviews", methods=["POST"])
 def create_tutor_review():
     global next_tutor_review_id
-
+ 
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
+ 
     data = request.get_json()
-
+ 
     if not data or not data.get("tutor_name") or not data.get("review_text"):
         return jsonify({"error": "Missing data"}), 400
-
+ 
     tutor_name = data["tutor_name"].strip()
     review_text = data["review_text"].strip()
-
+ 
     if not tutor_name or not review_text:
         return jsonify({"error": "Missing data"}), 400
-
+ 
     new_review = {
         "id": next_tutor_review_id,
         "review_text": review_text,
         "author_email": session["user"],
         "time": "Just now"
     }
-
+ 
     if tutor_name not in tutor_reviews:
         tutor_reviews[tutor_name] = []
-
+ 
     tutor_reviews[tutor_name].append(new_review)
     next_tutor_review_id += 1
     save_data()
-
+ 
     return jsonify(new_review), 201
-
-
+ 
+ 
 # --------------------------------------------------
 # TUTOR RATING ROUTES
 # --------------------------------------------------
@@ -1430,53 +1067,53 @@ def create_tutor_review():
 def get_tutor_ratings():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
+ 
     rating_summary = {}
-
+ 
     for tutor_name, info in tutor_rating_data.items():
         total = float(info.get("total", 0))
         count = int(info.get("count", 0))
         average = total / count if count > 0 else 0
-
+ 
         rating_summary[tutor_name] = {
             "average": average,
             "count": count
         }
-
+ 
     return jsonify(rating_summary), 200
-
-
+ 
+ 
 @app.route("/api/tutors/ratings", methods=["POST"])
 def submit_tutor_rating():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
+ 
     data = request.get_json()
-
+ 
     if not data or not data.get("tutor_name") or data.get("rating") is None:
         return jsonify({"error": "Missing data"}), 400
-
+ 
     tutor_name = data["tutor_name"].strip()
     user_email = session["user"]
-
+ 
     try:
         rating_value = int(data["rating"])
     except (TypeError, ValueError):
         return jsonify({"error": "Rating must be a number"}), 400
-
+ 
     if rating_value < 1 or rating_value > 5:
         return jsonify({"error": "Rating must be between 1 and 5"}), 400
-
+ 
     if tutor_name not in tutor_rating_data:
         tutor_rating_data[tutor_name] = {
             "total": 0,
             "count": 0,
             "by_user": {}
         }
-
+ 
     info = tutor_rating_data[tutor_name]
     by_user = info.setdefault("by_user", {})
-
+ 
     # If this user already rated this tutor, replace old rating
     if user_email in by_user:
         old_rating = by_user[user_email]
@@ -1486,18 +1123,18 @@ def submit_tutor_rating():
         info["total"] = float(info.get("total", 0)) + rating_value
         info["count"] = int(info.get("count", 0)) + 1
         by_user[user_email] = rating_value
-
+ 
     average = info["total"] / info["count"] if info["count"] > 0 else 0
     save_data()
-
+ 
     return jsonify({
         "tutor_name": tutor_name,
         "average": average,
         "count": info["count"],
         "your_rating": rating_value
     }), 200
-
-
+ 
+ 
 # --------------------------------------------------
 # TUTOR AVAILABILITY / BOOKING ROUTES
 # --------------------------------------------------
@@ -1505,61 +1142,60 @@ def submit_tutor_rating():
 def get_tutor_availability():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
+ 
     tutor_name = request.args.get("tutor_name", "").strip()
-
+ 
     if not tutor_name:
         return jsonify({"error": "tutor_name is required"}), 400
-
+ 
     available_slots = tutor_availability.get(tutor_name, [])
-
+ 
     return jsonify({
         "tutor_name": tutor_name,
         "available_slots": available_slots
     }), 200
-
-
+ 
+ 
 @app.route("/api/tutors/bookings", methods=["POST"])
 def create_tutor_booking():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
+ 
     data = request.get_json()
-
+ 
     if not data or not data.get("tutor_name") or not data.get("slot"):
         return jsonify({"error": "Missing data"}), 400
-
+ 
     tutor_name = data["tutor_name"].strip()
     slot = data["slot"].strip()
     user_email = session["user"]
-
+ 
     if tutor_name not in tutor_availability:
         return jsonify({"error": "Tutor not found"}), 404
-
+ 
     if slot not in tutor_availability[tutor_name]:
         return jsonify({"error": "That time is no longer available"}), 400
-
+ 
     # Remove booked slot from available list
     tutor_availability[tutor_name].remove(slot)
-
+ 
     # Save booking
     tutor_bookings.setdefault(tutor_name, []).append({
         "student_email": user_email,
         "slot": slot
     })
-
+ 
     save_data()
-
+ 
     return jsonify({
         "message": "Session booked successfully",
         "tutor_name": tutor_name,
         "slot": slot
     }), 201
-
-
+ 
+ 
 # --------------------------------------------------
 # START SERVER
 # --------------------------------------------------
 if __name__ == "__main__":
-    load_data()
     app.run(host="0.0.0.0", port=5000, debug=True)
