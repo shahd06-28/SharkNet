@@ -16,57 +16,77 @@
                     "liked_by": [
                         "sd2383@mynsu.nova.edu"
                     ],
-                    "fins_up": 1
+                    "fins_up": 1,
+                    "post_visibility": "anonymous",
+                    "author_display": "Anonymous"
                 },
                 {
                     "id": 12,
                     "reply_text": "We dont get a building but we do have a red chair you can sit on at the 4th floor of the Desantis building :)",
                     "author_email": "mm6386@mynsu.nova.edu",
-                    "liked_by": [],
-                    "fins_up": 0
+                    "liked_by": [
+                        "sd2383@mynsu.nova.edu"
+                    ],
+                    "fins_up": 1,
+                    "post_visibility": "anonymous",
+                    "author_display": "Anonymous"
                 }
-            ]
+            ],
+            "post_visibility": "anonymous",
+            "author_display": "Anonymous"
         }
     ],
-    "next_discussion_id": 9,
-    "next_reply_id": 13,
+    "next_discussion_id": 12,
+    "next_reply_id": 14,
     "tutor_reviews": {
         "Jane Doe": [
             {
                 "id": 1,
                 "review_text": "Super clear explanations!",
                 "author_email": "",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             },
             {
                 "id": 2,
                 "review_text": "Helped me debug my projects.",
                 "author_email": "",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             },
             {
                 "id": 15,
                 "review_text": "Amazing tutor! Highly recommend",
                 "author_email": "sd2383@mynsu.nova.edu",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             },
             {
                 "id": 16,
                 "review_text": "100 stars great tutor",
                 "author_email": "sd2383@mynsu.nova.edu",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             },
             {
                 "id": 17,
                 "review_text": "hii",
                 "author_email": "sd2383@mynsu.nova.edu",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             },
             {
                 "id": 18,
                 "review_text": "test",
                 "author_email": "mm6386@mynsu.nova.edu",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             }
         ],
         "Alice Susan": [
@@ -74,13 +94,17 @@
                 "id": 3,
                 "review_text": "Helped me understand SQL queries.",
                 "author_email": "",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             },
             {
                 "id": 4,
                 "review_text": "Super friendly and patient.",
                 "author_email": "",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             }
         ],
         "Michael Brown": [
@@ -88,25 +112,33 @@
                 "id": 5,
                 "review_text": "Explains concepts in a really understandable way.",
                 "author_email": "",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             },
             {
                 "id": 6,
                 "review_text": "Great study tips for exams!",
                 "author_email": "",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             },
             {
                 "id": 19,
                 "review_text": "great guy",
                 "author_email": "sd2383@mynsu.nova.edu",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             },
             {
                 "id": 20,
                 "review_text": "WHAT THE HECK MICHAEL",
                 "author_email": "mm6386@mynsu.nova.edu",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             }
         ],
         "Emily Lee": [
@@ -114,13 +146,17 @@
                 "id": 7,
                 "review_text": "Helped me improve my research paper.",
                 "author_email": "",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             },
             {
                 "id": 8,
                 "review_text": "Very knowledgeable and patient.",
                 "author_email": "",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             }
         ],
         "John Smith": [
@@ -128,13 +164,17 @@
                 "id": 9,
                 "review_text": "Great explanations for complex engineering topics.",
                 "author_email": "",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             },
             {
                 "id": 10,
                 "review_text": "Helped me understand lab experiments.",
                 "author_email": "",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             }
         ],
         "Samantha Green": [
@@ -142,13 +182,17 @@
                 "id": 11,
                 "review_text": "Explains finance concepts clearly.",
                 "author_email": "",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             },
             {
                 "id": 12,
                 "review_text": "Helped me with my marketing assignment.",
                 "author_email": "",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             }
         ],
         "David Wilson": [
@@ -156,23 +200,27 @@
                 "id": 13,
                 "review_text": "Very patient and thorough explanations.",
                 "author_email": "",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             },
             {
                 "id": 14,
                 "review_text": "Helped me prepare for exams effectively.",
                 "author_email": "",
-                "time": "Just now"
+                "time": "Just now",
+                "author_display": "Anonymous",
+                "post_visibility": "anonymous"
             }
         ]
     },
     "next_tutor_review_id": 21,
     "tutor_rating_data": {
         "Michael Brown": {
-            "total": 14.8,
+            "total": 13.8,
             "count": 3,
             "by_user": {
-                "sd2383@mynsu.nova.edu": 5,
+                "sd2383@mynsu.nova.edu": 4,
                 "mm6386@mynsu.nova.edu": 5
             }
         },
@@ -182,9 +230,11 @@
             "by_user": {}
         },
         "Alice Susan": {
-            "total": 4.7,
-            "count": 1,
-            "by_user": {}
+            "total": 7.699999999999999,
+            "count": 2,
+            "by_user": {
+                "sd2383@mynsu.nova.edu": 3
+            }
         },
         "Jane Doe": {
             "total": 4.9,
