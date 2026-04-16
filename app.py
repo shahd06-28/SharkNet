@@ -523,11 +523,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.querySelectorAll(".featured-section .card").forEach(card => {
         const titleEl = card.querySelector("h3");
-        const buttonEl = card.querySelector("button");
-        if (!titleEl || !buttonEl) return;
-
-        const title = titleEl.textContent.trim();
-        const target = discussionTargets[title] || tutorTargets[title];
+        const buttonEl = card.querySelector("button");1rTargets[title];
         if (!target) return;
 
         const go = () => { window.location.href = target; };

@@ -6,8 +6,10 @@
             "title": "Is there a computer science building at Nova?",
             "time": "Just now",
             "author_email": "sd2383@mynsu.nova.edu",
-            "liked_by": [],
-            "fins_up": 0,
+            "liked_by": [
+                "mm6386@mynsu.nova.edu"
+            ],
+            "fins_up": 1,
             "replies": [
                 {
                     "id": 11,
@@ -25,9 +27,10 @@
                     "reply_text": "We dont get a building but we do have a red chair you can sit on at the 4th floor of the Desantis building :)",
                     "author_email": "mm6386@mynsu.nova.edu",
                     "liked_by": [
-                        "sd2383@mynsu.nova.edu"
+                        "sd2383@mynsu.nova.edu",
+                        "mm6386@mynsu.nova.edu"
                     ],
-                    "fins_up": 1,
+                    "fins_up": 2,
                     "post_visibility": "anonymous",
                     "author_display": "Anonymous"
                 }
@@ -79,7 +82,7 @@
         }
     ],
     "next_discussion_id": 16,
-    "next_reply_id": 14,
+    "next_reply_id": 15,
     "tutor_reviews": {
         "Jane Doe": [
             {
@@ -283,9 +286,11 @@
             "by_user": {}
         },
         "David Wilson": {
-            "total": 4.8,
-            "count": 1,
-            "by_user": {}
+            "total": 7.8,
+            "count": 2,
+            "by_user": {
+                "mm6386@mynsu.nova.edu": 3
+            }
         },
         "Emily Lee": {
             "total": 4.9,
@@ -298,8 +303,7 @@
         "Samantha Green": [],
         "Alice Susan": [
             "Monday 12:00 PM",
-            "Wednesday 4:00 PM",
-            "Friday 10:00 AM"
+            "Wednesday 4:00 PM"
         ],
         "Jane Doe": [
             "Tuesday 1:00 PM",
@@ -351,7 +355,12 @@
                 "slot": "Friday 4:00 PM"
             }
         ],
-        "Alice Susan": [],
+        "Alice Susan": [
+            {
+                "student_email": "mm6386@mynsu.nova.edu",
+                "slot": "Friday 10:00 AM"
+            }
+        ],
         "Jane Doe": [],
         "John Smith": [],
         "David Wilson": [],
