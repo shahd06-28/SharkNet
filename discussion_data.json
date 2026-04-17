@@ -34,9 +34,51 @@
             ],
             "post_visibility": "anonymous",
             "author_display": "Anonymous"
+        },
+        {
+            "id": 13,
+            "major": "Campus",
+            "title": "Does anyone know what office handles financial aid appeals?",
+            "time": "Just now",
+            "author_email": "mm6386@mynsu.nova.edu",
+            "author_display": "Anonymous",
+            "post_visibility": "anonymous",
+            "liked_by": [
+                "mm6386@mynsu.nova.edu"
+            ],
+            "fins_up": 1,
+            "replies": []
+        },
+        {
+            "id": 14,
+            "major": "Computer Science",
+            "title": "Whats an easy way to remember the differences between the different tree types?",
+            "time": "Just now",
+            "author_email": "mm6386@mynsu.nova.edu",
+            "author_display": "Anonymous",
+            "post_visibility": "anonymous",
+            "liked_by": [
+                "mm6386@mynsu.nova.edu"
+            ],
+            "fins_up": 1,
+            "replies": []
+        },
+        {
+            "id": 15,
+            "major": "Psychology",
+            "title": "Anyone take Dr. Cooper for Psych 101? Does he care more about theory or examples in our research papers?",
+            "time": "Just now",
+            "author_email": "mm6386@mynsu.nova.edu",
+            "author_display": "Anonymous",
+            "post_visibility": "anonymous",
+            "liked_by": [
+                "mm6386@mynsu.nova.edu"
+            ],
+            "fins_up": 1,
+            "replies": []
         }
     ],
-    "next_discussion_id": 12,
+    "next_discussion_id": 16,
     "next_reply_id": 14,
     "tutor_reviews": {
         "Jane Doe": [
@@ -128,14 +170,6 @@
                 "id": 19,
                 "review_text": "great guy",
                 "author_email": "sd2383@mynsu.nova.edu",
-                "time": "Just now",
-                "author_display": "Anonymous",
-                "post_visibility": "anonymous"
-            },
-            {
-                "id": 20,
-                "review_text": "WHAT THE HECK MICHAEL",
-                "author_email": "mm6386@mynsu.nova.edu",
                 "time": "Just now",
                 "author_display": "Anonymous",
                 "post_visibility": "anonymous"
@@ -327,5 +361,19 @@
         "David Wilson": [],
         "Emily Lee": []
     },
-    "tutor_requests": []
+    "tutor_requests": [
+        {
+            "id": 1,
+            "name": "mm6386",
+            "email": "mm6386@mynsu.nova.edu",
+            "major": "comp sci",
+            "year": "Junior",
+            "subjects": "comp sci",
+            "phone": "",
+            "experience": "test",
+            "availability": "all",
+            "resume_filename": "",
+            "submitted_by": "mm6386@mynsu.nova.edu"
+        }
+    ]
 }
