@@ -302,8 +302,13 @@
         "Michael Brown": [],
         "Samantha Green": [],
         "Alice Susan": [
+<<<<<<< HEAD
             "Monday 12:00 PM",
             "Wednesday 4:00 PM"
+=======
+            "Wednesday 4:00 PM",
+            "Friday 10:00 AM"
+>>>>>>> c0d76e6a0ac5a61d2be82f37a921074216f01aa4
         ],
         "Jane Doe": [
             "Tuesday 1:00 PM",
@@ -357,8 +362,13 @@
         ],
         "Alice Susan": [
             {
+<<<<<<< HEAD
                 "student_email": "mm6386@mynsu.nova.edu",
                 "slot": "Friday 10:00 AM"
+=======
+                "student_email": "sd2383@mynsu.nova.edu",
+                "slot": "Monday 12:00 PM"
+>>>>>>> c0d76e6a0ac5a61d2be82f37a921074216f01aa4
             }
         ],
         "Jane Doe": [],

@@ -2,6 +2,7 @@ from flask import Flask, send_from_directory, request, redirect, session, jsonif
 import os
 import json
 import re
+import sqlite3
 import smtplib
 import mimetypes
 from email.message import EmailMessage
@@ -12,7 +13,7 @@ app.secret_key = "sharknet_secret_key"
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UI_DIR = os.path.join(BASE_DIR, "UI")
-DATA_FILE = os.path.join(BASE_DIR, "discussion_data.json")
+DB = os.path.join(BASE_DIR, "sharknet.db")
 UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 TUTOR_REQUEST_EMAILS = [
     "nj616@mynsu.nova.edu",
@@ -22,52 +23,15 @@ TUTOR_REQUEST_EMAILS = [
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+
 # --------------------------------------------------
-# DATA STORAGE
+# DATABASE
 # --------------------------------------------------
-# Discussions data
-discussions_data = []
-next_discussion_id = 1
-next_reply_id = 1
-
-# Tutor reviews
-tutor_reviews = {}
-next_tutor_review_id = 1
-
-# Tutor ratings
-# Stored as:
-# {
-#   "Jane Doe": {
-#       "total": 4.9,
-#       "count": 1,
-#       "by_user": {
-#           "student@mynsu.nova.edu": 5
-#       }
-#   }
-# }
-tutor_rating_data = {}
-
-# Tutor availability
-# Stored as:
-# {
-#   "Jane Doe": ["Monday 10:00 AM", "Tuesday 2:00 PM", ...]
-# }
-tutor_availability = {}
-
-# Tutor bookings
-# Stored as:
-# {
-#   "Jane Doe": [
-#       {
-#           "student_email": "student@mynsu.nova.edu",
-#           "slot": "Monday 10:00 AM"
-#       }
-#   ]
-# }
-tutor_bookings = {}
-
-# Tutor requests
-tutor_requests = []
+def get_db():
+    conn = sqlite3.connect(DB)
+    conn.execute("PRAGMA foreign_keys = ON")
+    conn.row_factory = sqlite3.Row
+    return conn
 
 
 # --------------------------------------------------
@@ -85,7 +49,6 @@ def build_display_identity(email, visibility_choice):
             "post_visibility": "id",
             "author_display": get_public_user_id(email)
         }
-
     return {
         "post_visibility": "anonymous",
         "author_display": "Anonymous"
@@ -128,7 +91,6 @@ def send_tutor_request_email(request_record, saved_resume_path=None):
             maintype, subtype = mime_type.split("/", 1)
         else:
             maintype, subtype = "application", "octet-stream"
-
         with open(saved_resume_path, "rb") as f:
             msg.add_attachment(
                 f.read(),
@@ -147,361 +109,6 @@ def send_tutor_request_email(request_record, saved_resume_path=None):
         return True, "Tutor request email sent."
     except Exception as exc:
         return False, f"Tutor request was saved, but email sending failed: {exc}"
-
-
-# --------------------------------------------------
-# DEFAULT TUTOR REVIEWS
-# --------------------------------------------------
-def get_default_tutor_reviews():
-    return {
-        "Jane Doe": [
-            {
-                "id": 1,
-                "review_text": "Super clear explanations!",
-                "author_email": "",
-                "author_display": "Anonymous",
-                "post_visibility": "anonymous",
-                "time": "Just now"
-            },
-            {
-                "id": 2,
-                "review_text": "Helped me debug my projects.",
-                "author_email": "",
-                "author_display": "Anonymous",
-                "post_visibility": "anonymous",
-                "time": "Just now"
-            }
-        ],
-        "Alice Susan": [
-            {
-                "id": 3,
-                "review_text": "Helped me understand SQL queries.",
-                "author_email": "",
-                "author_display": "Anonymous",
-                "post_visibility": "anonymous",
-                "time": "Just now"
-            },
-            {
-                "id": 4,
-                "review_text": "Super friendly and patient.",
-                "author_email": "",
-                "author_display": "Anonymous",
-                "post_visibility": "anonymous",
-                "time": "Just now"
-            }
-        ],
-        "Michael Brown": [
-            {
-                "id": 5,
-                "review_text": "Explains concepts in a really understandable way.",
-                "author_email": "",
-                "author_display": "Anonymous",
-                "post_visibility": "anonymous",
-                "time": "Just now"
-            },
-            {
-                "id": 6,
-                "review_text": "Great study tips for exams!",
-                "author_email": "",
-                "author_display": "Anonymous",
-                "post_visibility": "anonymous",
-                "time": "Just now"
-            }
-        ],
-        "Emily Lee": [
-            {
-                "id": 7,
-                "review_text": "Helped me improve my research paper.",
-                "author_email": "",
-                "author_display": "Anonymous",
-                "post_visibility": "anonymous",
-                "time": "Just now"
-            },
-            {
-                "id": 8,
-                "review_text": "Very knowledgeable and patient.",
-                "author_email": "",
-                "author_display": "Anonymous",
-                "post_visibility": "anonymous",
-                "time": "Just now"
-            }
-        ],
-        "John Smith": [
-            {
-                "id": 9,
-                "review_text": "Great explanations for complex engineering topics.",
-                "author_email": "",
-                "author_display": "Anonymous",
-                "post_visibility": "anonymous",
-                "time": "Just now"
-            },
-            {
-                "id": 10,
-                "review_text": "Helped me understand lab experiments.",
-                "author_email": "",
-                "author_display": "Anonymous",
-                "post_visibility": "anonymous",
-                "time": "Just now"
-            }
-        ],
-        "Samantha Green": [
-            {
-                "id": 11,
-                "review_text": "Explains finance concepts clearly.",
-                "author_email": "",
-                "author_display": "Anonymous",
-                "post_visibility": "anonymous",
-                "time": "Just now"
-            },
-            {
-                "id": 12,
-                "review_text": "Helped me with my marketing assignment.",
-                "author_email": "",
-                "author_display": "Anonymous",
-                "post_visibility": "anonymous",
-                "time": "Just now"
-            }
-        ],
-        "David Wilson": [
-            {
-                "id": 13,
-                "review_text": "Very patient and thorough explanations.",
-                "author_email": "",
-                "author_display": "Anonymous",
-                "post_visibility": "anonymous",
-                "time": "Just now"
-            },
-            {
-                "id": 14,
-                "review_text": "Helped me prepare for exams effectively.",
-                "author_email": "",
-                "author_display": "Anonymous",
-                "post_visibility": "anonymous",
-                "time": "Just now"
-            }
-        ]
-    }
-
-
-# --------------------------------------------------
-# DEFAULT TUTOR RATINGS
-# --------------------------------------------------
-# These preserve the starting values already shown in your UI.
-def get_default_tutor_rating_data():
-    return {
-        "Michael Brown": {"total": 4.8, "count": 1, "by_user": {}},
-        "Samantha Green": {"total": 4.7, "count": 1, "by_user": {}},
-        "Alice Susan": {"total": 4.7, "count": 1, "by_user": {}},
-        "Jane Doe": {"total": 4.9, "count": 1, "by_user": {}},
-        "John Smith": {"total": 4.8, "count": 1, "by_user": {}},
-        "David Wilson": {"total": 4.8, "count": 1, "by_user": {}},
-        "Emily Lee": {"total": 4.9, "count": 1, "by_user": {}}
-    }
-
-
-# --------------------------------------------------
-# DEFAULT TUTOR AVAILABILITY
-# --------------------------------------------------
-def get_default_tutor_availability():
-    return {
-        "Michael Brown": [
-            "Monday 10:00 AM",
-            "Wednesday 1:00 PM",
-            "Thursday 3:00 PM"
-        ],
-        "Samantha Green": [
-            "Tuesday 11:00 AM",
-            "Thursday 2:00 PM",
-            "Friday 4:00 PM"
-        ],
-        "Alice Susan": [
-            "Monday 12:00 PM",
-            "Wednesday 4:00 PM",
-            "Friday 10:00 AM"
-        ],
-        "Jane Doe": [
-            "Tuesday 1:00 PM",
-            "Thursday 11:00 AM",
-            "Friday 2:00 PM"
-        ],
-        "John Smith": [
-            "Monday 3:00 PM",
-            "Wednesday 10:00 AM",
-            "Friday 12:00 PM"
-        ],
-        "David Wilson": [
-            "Tuesday 9:00 AM",
-            "Thursday 1:00 PM",
-            "Friday 3:00 PM"
-        ],
-        "Emily Lee": [
-            "Monday 11:00 AM",
-            "Wednesday 2:00 PM",
-            "Thursday 4:00 PM"
-        ]
-    }
-
-
-# --------------------------------------------------
-# SAVE DATA TO JSON
-# --------------------------------------------------
-def save_data():
-    data = {
-        "discussions_data": discussions_data,
-        "next_discussion_id": next_discussion_id,
-        "next_reply_id": next_reply_id,
-        "tutor_reviews": tutor_reviews,
-        "next_tutor_review_id": next_tutor_review_id,
-        "tutor_rating_data": tutor_rating_data,
-        "tutor_availability": tutor_availability,
-        "tutor_bookings": tutor_bookings,
-        "tutor_requests": tutor_requests
-    }
-
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
-
-
-# --------------------------------------------------
-# CLEAN / MIGRATE LOADED DATA
-# --------------------------------------------------
-def migrate_loaded_data():
-    global discussions_data, tutor_reviews, next_tutor_review_id
-    global tutor_rating_data, tutor_availability, tutor_bookings, tutor_requests
-
-    # Make sure discussions always have needed keys
-    for discussion in discussions_data:
-        if "author_email" not in discussion:
-            discussion["author_email"] = ""
-        if "liked_by" not in discussion:
-            discussion["liked_by"] = []
-        if "fins_up" not in discussion:
-            discussion["fins_up"] = len(discussion["liked_by"])
-        if "replies" not in discussion:
-            discussion["replies"] = []
-        if "post_visibility" not in discussion:
-            discussion["post_visibility"] = "anonymous"
-        if "author_display" not in discussion:
-            discussion["author_display"] = "Anonymous"
-
-        for reply in discussion.get("replies", []):
-            if "author_email" not in reply:
-                reply["author_email"] = ""
-            if "liked_by" not in reply:
-                reply["liked_by"] = []
-            if "fins_up" not in reply:
-                reply["fins_up"] = len(reply["liked_by"])
-            if "post_visibility" not in reply:
-                reply["post_visibility"] = "anonymous"
-            if "author_display" not in reply:
-                reply["author_display"] = "Anonymous"
-
-    # Reviews
-    default_reviews = get_default_tutor_reviews()
-
-    if not isinstance(tutor_reviews, dict):
-        tutor_reviews = default_reviews
-    else:
-        for tutor_name, reviews in default_reviews.items():
-            if tutor_name not in tutor_reviews:
-                tutor_reviews[tutor_name] = reviews
-
-    max_review_id = 0
-    for review_list in tutor_reviews.values():
-        for review in review_list:
-            if "id" not in review:
-                max_review_id += 1
-                review["id"] = max_review_id
-            else:
-                max_review_id = max(max_review_id, review["id"])
-
-            if "review_text" not in review:
-                review["review_text"] = ""
-            if "author_email" not in review:
-                review["author_email"] = ""
-            if "author_display" not in review:
-                review["author_display"] = "Anonymous"
-            if "post_visibility" not in review:
-                review["post_visibility"] = "anonymous"
-            if "time" not in review:
-                review["time"] = "Just now"
-
-    if next_tutor_review_id <= max_review_id:
-        next_tutor_review_id = max_review_id + 1
-
-    # Ratings
-    default_ratings = get_default_tutor_rating_data()
-
-    if not isinstance(tutor_rating_data, dict):
-        tutor_rating_data = default_ratings
-    else:
-        for tutor_name, rating_info in default_ratings.items():
-            if tutor_name not in tutor_rating_data:
-                tutor_rating_data[tutor_name] = rating_info
-            else:
-                tutor_rating_data[tutor_name].setdefault("total", rating_info["total"])
-                tutor_rating_data[tutor_name].setdefault("count", rating_info["count"])
-                tutor_rating_data[tutor_name].setdefault("by_user", {})
-
-    # Availability
-    default_availability = get_default_tutor_availability()
-
-    if not isinstance(tutor_availability, dict):
-        tutor_availability = default_availability
-    else:
-        for tutor_name, slots in default_availability.items():
-            if tutor_name not in tutor_availability:
-                tutor_availability[tutor_name] = slots
-
-    # Bookings
-    if not isinstance(tutor_bookings, dict):
-        tutor_bookings = {}
-
-    for tutor_name in default_availability.keys():
-        tutor_bookings.setdefault(tutor_name, [])
-
-    if not isinstance(tutor_requests, list):
-        tutor_requests = []
-
-
-# --------------------------------------------------
-# LOAD DATA FROM JSON
-# --------------------------------------------------
-def load_data():
-    global discussions_data, next_discussion_id, next_reply_id
-    global tutor_reviews, next_tutor_review_id
-    global tutor_rating_data, tutor_availability, tutor_bookings, tutor_requests
-
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        discussions_data = data.get("discussions_data", [])
-        next_discussion_id = data.get("next_discussion_id", 1)
-        next_reply_id = data.get("next_reply_id", 1)
-
-        tutor_reviews = data.get("tutor_reviews", get_default_tutor_reviews())
-        next_tutor_review_id = data.get("next_tutor_review_id", 1)
-
-        tutor_rating_data = data.get("tutor_rating_data", get_default_tutor_rating_data())
-        tutor_availability = data.get("tutor_availability", get_default_tutor_availability())
-        tutor_bookings = data.get("tutor_bookings", {})
-        tutor_requests = data.get("tutor_requests", [])
-
-        migrate_loaded_data()
-    else:
-        discussions_data = []
-        next_discussion_id = 1
-        next_reply_id = 1
-
-        tutor_reviews = get_default_tutor_reviews()
-        next_tutor_review_id = 15
-
-        tutor_rating_data = get_default_tutor_rating_data()
-        tutor_availability = get_default_tutor_availability()
-        tutor_bookings = {name: [] for name in tutor_availability.keys()}
-        tutor_requests = []
-
 
 # --------------------------------------------------
 # RUNTIME SCRIPT INJECTION FOR ORIGINAL home.html
@@ -1606,73 +1213,38 @@ if (requestedTutor) {
 """
 
 
+
 # --------------------------------------------------
 # HTML INJECTION HELPERS
 # --------------------------------------------------
 def serve_home_with_runtime_script():
     file_path = os.path.join(UI_DIR, "home.html")
-
     with open(file_path, "r", encoding="utf-8") as f:
         html = f.read()
-
     if re.search(r"</body>", html, flags=re.IGNORECASE):
-        html = re.sub(
-            r"</body>",
-            HOME_RUNTIME_SCRIPT + "\n</body>",
-            html,
-            count=1,
-            flags=re.IGNORECASE
-        )
+        html = re.sub(r"</body>", HOME_RUNTIME_SCRIPT + "\n</body>", html, count=1, flags=re.IGNORECASE)
     else:
         html += HOME_RUNTIME_SCRIPT
-
     return Response(html, mimetype="text/html")
 
 
 def serve_discussions_with_runtime_script():
     file_path = os.path.join(UI_DIR, "discussions.html")
-
     with open(file_path, "r", encoding="utf-8") as f:
         html = f.read()
-
     current_user_email_json = json.dumps(session.get("user", ""))
-
-    injected_script = DISCUSSIONS_RUNTIME_SCRIPT.replace(
-        "{{CURRENT_USER_EMAIL_JSON}}",
-        current_user_email_json
-    )
-
-    html = re.sub(
-        r"<script>[\s\S]*?</script>\s*</body>",
-        injected_script + "\n</body>",
-        html,
-        count=1,
-        flags=re.IGNORECASE
-    )
-
+    injected_script = DISCUSSIONS_RUNTIME_SCRIPT.replace("{{CURRENT_USER_EMAIL_JSON}}", current_user_email_json)
+    html = re.sub(r"<script>[\s\S]*?</script>\s*</body>", injected_script + "\n</body>", html, count=1, flags=re.IGNORECASE)
     return Response(html, mimetype="text/html")
 
 
 def serve_tutors_with_runtime_script():
     file_path = os.path.join(UI_DIR, "tutors.html")
-
     with open(file_path, "r", encoding="utf-8") as f:
         html = f.read()
-
     current_user_email_json = json.dumps(session.get("user", ""))
-    injected_script = TUTORS_RUNTIME_SCRIPT.replace(
-        "{{CURRENT_USER_EMAIL_JSON}}",
-        current_user_email_json
-    )
-
-    html = re.sub(
-        r"<script>[\s\S]*?</script>\s*</body>",
-        injected_script + "\n</body>",
-        html,
-        count=1,
-        flags=re.IGNORECASE
-    )
-
+    injected_script = TUTORS_RUNTIME_SCRIPT.replace("{{CURRENT_USER_EMAIL_JSON}}", current_user_email_json)
+    html = re.sub(r"<script>[\s\S]*?</script>\s*</body>", injected_script + "\n</body>", html, count=1, flags=re.IGNORECASE)
     return Response(html, mimetype="text/html")
 
 
@@ -1736,13 +1308,14 @@ def image_files(filename):
 @app.route("/login", methods=["POST"])
 def login_process():
     email = request.form.get("email", "").strip().lower()
-
     if not email:
         return "Email is required", 400
-
     if not email.endswith("@mynsu.nova.edu"):
         return "Only NSU student emails allowed", 400
-
+    conn = get_db()
+    conn.execute("INSERT OR IGNORE INTO students (email) VALUES (?)", (email,))
+    conn.commit()
+    conn.close()
     session["user"] = email
     return redirect("/home.html")
 
@@ -1763,25 +1336,48 @@ def logout():
 def get_discussions():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
     major = request.args.get("major")
-
     if not major:
         return jsonify({"error": "Major is required"}), 400
 
-    filtered = [d for d in discussions_data if d["major"] == major]
-    return jsonify(filtered), 200
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT * FROM discussions WHERE major = ? ORDER BY created_at DESC", (major,)
+    ).fetchall()
+
+    result = []
+    for row in rows:
+        d = dict(row)
+        # compute fins_up from likes table
+        like_count = conn.execute(
+            "SELECT COUNT(*) FROM discussion_likes WHERE discussion_id = ?", (d["id"],)
+        ).fetchone()[0]
+        d["fins_up"] = like_count
+
+        replies = conn.execute(
+            "SELECT * FROM replies WHERE discussion_id = ? ORDER BY created_at ASC", (d["id"],)
+        ).fetchall()
+        reply_list = []
+        for r in replies:
+            rd = dict(r)
+            rd["fins_up"] = conn.execute(
+                "SELECT COUNT(*) FROM reply_likes WHERE reply_id = ?", (rd["id"],)
+            ).fetchone()[0]
+            reply_list.append(rd)
+
+        d["replies"] = reply_list
+        d["time"] = d["created_at"]
+        result.append(d)
+
+    conn.close()
+    return jsonify(result), 200
 
 
 @app.route("/api/discussions", methods=["POST"])
 def create_discussion():
-    global next_discussion_id
-
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
     data = request.get_json()
-
     if not data or not data.get("major") or not data.get("question"):
         return jsonify({"error": "Missing data"}), 400
 
@@ -1789,8 +1385,19 @@ def create_discussion():
     visibility_choice = str(data.get("visibility_choice", "anonymous")).strip().lower()
     identity = build_display_identity(user_email, visibility_choice)
 
-    new_discussion = {
-        "id": next_discussion_id,
+    conn = get_db()
+    conn.execute("INSERT OR IGNORE INTO students (email) VALUES (?)", (user_email,))
+    cur = conn.execute(
+        """INSERT INTO discussions (major, title, author_email, author_display, post_visibility, fins_up)
+           VALUES (?, ?, ?, ?, ?, 0)""",
+        (data["major"], data["question"], user_email, identity["author_display"], identity["post_visibility"])
+    )
+    conn.commit()
+    new_id = cur.lastrowid
+    conn.close()
+
+    return jsonify({
+        "id": new_id,
         "major": data["major"],
         "title": data["question"],
         "time": "Just now",
@@ -1800,163 +1407,176 @@ def create_discussion():
         "liked_by": [],
         "fins_up": 0,
         "replies": []
-    }
-
-    discussions_data.append(new_discussion)
-    next_discussion_id += 1
-    save_data()
-
-    return jsonify(new_discussion), 201
+    }), 201
 
 
 @app.route("/api/discussions/toggle_like", methods=["POST"])
 def toggle_discussion_like():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
     data = request.get_json()
-
     if not data or not data.get("discussion_id"):
         return jsonify({"error": "discussion_id is required"}), 400
 
     discussion_id = data["discussion_id"]
     user_email = session["user"]
 
-    for discussion in discussions_data:
-        if discussion["id"] == discussion_id:
-            liked_by = discussion.setdefault("liked_by", [])
+    conn = get_db()
+    existing = conn.execute(
+        "SELECT 1 FROM discussion_likes WHERE discussion_id = ? AND student_email = ?",
+        (discussion_id, user_email)
+    ).fetchone()
 
-            if user_email in liked_by:
-                liked_by.remove(user_email)
-            else:
-                liked_by.append(user_email)
+    if existing:
+        conn.execute(
+            "DELETE FROM discussion_likes WHERE discussion_id = ? AND student_email = ?",
+            (discussion_id, user_email)
+        )
+        liked = False
+    else:
+        conn.execute(
+            "INSERT INTO discussion_likes (discussion_id, student_email) VALUES (?, ?)",
+            (discussion_id, user_email)
+        )
+        liked = True
 
-            discussion["fins_up"] = len(liked_by)
-            save_data()
+    conn.commit()
+    fins_up = conn.execute(
+        "SELECT COUNT(*) FROM discussion_likes WHERE discussion_id = ?", (discussion_id,)
+    ).fetchone()[0]
+    conn.execute("UPDATE discussions SET fins_up = ? WHERE id = ?", (fins_up, discussion_id))
+    conn.commit()
+    conn.close()
 
-            return jsonify({
-                "id": discussion["id"],
-                "fins_up": discussion["fins_up"],
-                "liked": user_email in liked_by
-            }), 200
-
-    return jsonify({"error": "Discussion not found"}), 404
+    return jsonify({"id": discussion_id, "fins_up": fins_up, "liked": liked}), 200
 
 
 @app.route("/api/discussions/<int:discussion_id>", methods=["DELETE"])
 def delete_discussion(discussion_id):
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
     user_email = session["user"]
 
-    for index, discussion in enumerate(discussions_data):
-        if discussion["id"] == discussion_id:
-            if discussion.get("author_email") != user_email:
-                return jsonify({"error": "You can only delete your own post"}), 403
+    conn = get_db()
+    row = conn.execute("SELECT * FROM discussions WHERE id = ?", (discussion_id,)).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({"error": "Discussion not found"}), 404
+    if row["author_email"] != user_email:
+        conn.close()
+        return jsonify({"error": "You can only delete your own post"}), 403
 
-            discussions_data.pop(index)
-            save_data()
-            return jsonify({"success": True}), 200
+    # cascade: delete reply likes, replies, discussion likes, discussion
+    reply_ids = [r["id"] for r in conn.execute(
+        "SELECT id FROM replies WHERE discussion_id = ?", (discussion_id,)
+    ).fetchall()]
+    for rid in reply_ids:
+        conn.execute("DELETE FROM reply_likes WHERE reply_id = ?", (rid,))
+    conn.execute("DELETE FROM replies WHERE discussion_id = ?", (discussion_id,))
+    conn.execute("DELETE FROM discussion_likes WHERE discussion_id = ?", (discussion_id,))
+    conn.execute("DELETE FROM discussions WHERE id = ?", (discussion_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True}), 200
 
-    return jsonify({"error": "Discussion not found"}), 404
 
-
+# --------------------------------------------------
+# REPLY ROUTES
+# --------------------------------------------------
 @app.route("/api/replies", methods=["POST"])
 def create_reply():
-    global next_reply_id
-
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
     data = request.get_json()
-
     if not data or not data.get("discussion_id") or not data.get("reply_text"):
         return jsonify({"error": "Missing data"}), 400
 
-    discussion_id = data["discussion_id"]
     user_email = session["user"]
     visibility_choice = str(data.get("visibility_choice", "anonymous")).strip().lower()
     identity = build_display_identity(user_email, visibility_choice)
 
-    new_reply = {
-        "id": next_reply_id,
+    conn = get_db()
+    cur = conn.execute(
+        """INSERT INTO replies (discussion_id, reply_text, author_email, author_display, post_visibility, fins_up)
+           VALUES (?, ?, ?, ?, ?, 0)""",
+        (data["discussion_id"], data["reply_text"], user_email, identity["author_display"], identity["post_visibility"])
+    )
+    conn.commit()
+    new_id = cur.lastrowid
+    conn.close()
+
+    return jsonify({
+        "id": new_id,
         "reply_text": data["reply_text"],
         "author_email": user_email,
         "author_display": identity["author_display"],
         "post_visibility": identity["post_visibility"],
         "liked_by": [],
         "fins_up": 0
-    }
-
-    for discussion in discussions_data:
-        if discussion["id"] == discussion_id:
-            discussion["replies"].append(new_reply)
-            next_reply_id += 1
-            save_data()
-            return jsonify(new_reply), 201
-
-    return jsonify({"error": "Discussion not found"}), 404
+    }), 201
 
 
 @app.route("/api/replies/toggle_like", methods=["POST"])
 def toggle_reply_like():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
     data = request.get_json()
+    if not data or not data.get("reply_id"):
+        return jsonify({"error": "reply_id is required"}), 400
 
-    if not data or not data.get("discussion_id") or not data.get("reply_id"):
-        return jsonify({"error": "discussion_id and reply_id are required"}), 400
-
-    discussion_id = data["discussion_id"]
     reply_id = data["reply_id"]
     user_email = session["user"]
 
-    for discussion in discussions_data:
-        if discussion["id"] == discussion_id:
-            for reply in discussion.get("replies", []):
-                if reply["id"] == reply_id:
-                    liked_by = reply.setdefault("liked_by", [])
+    conn = get_db()
+    existing = conn.execute(
+        "SELECT 1 FROM reply_likes WHERE reply_id = ? AND student_email = ?",
+        (reply_id, user_email)
+    ).fetchone()
 
-                    if user_email in liked_by:
-                        liked_by.remove(user_email)
-                    else:
-                        liked_by.append(user_email)
+    if existing:
+        conn.execute(
+            "DELETE FROM reply_likes WHERE reply_id = ? AND student_email = ?",
+            (reply_id, user_email)
+        )
+        liked = False
+    else:
+        conn.execute(
+            "INSERT INTO reply_likes (reply_id, student_email) VALUES (?, ?)",
+            (reply_id, user_email)
+        )
+        liked = True
 
-                    reply["fins_up"] = len(liked_by)
-                    save_data()
+    conn.commit()
+    fins_up = conn.execute(
+        "SELECT COUNT(*) FROM reply_likes WHERE reply_id = ?", (reply_id,)
+    ).fetchone()[0]
+    conn.execute("UPDATE replies SET fins_up = ? WHERE id = ?", (fins_up, reply_id))
+    conn.commit()
+    conn.close()
 
-                    return jsonify({
-                        "id": reply["id"],
-                        "fins_up": reply["fins_up"],
-                        "liked": user_email in liked_by
-                    }), 200
-
-            return jsonify({"error": "Reply not found"}), 404
-
-    return jsonify({"error": "Discussion not found"}), 404
+    return jsonify({"id": reply_id, "fins_up": fins_up, "liked": liked}), 200
 
 
 @app.route("/api/replies/<int:reply_id>", methods=["DELETE"])
 def delete_reply(reply_id):
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
     user_email = session["user"]
 
-    for discussion in discussions_data:
-        replies = discussion.get("replies", [])
-        for index, reply in enumerate(replies):
-            if reply["id"] == reply_id:
-                if reply.get("author_email") != user_email:
-                    return jsonify({"error": "You can only delete your own reply"}), 403
+    conn = get_db()
+    row = conn.execute("SELECT * FROM replies WHERE id = ?", (reply_id,)).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({"error": "Reply not found"}), 404
+    if row["author_email"] != user_email:
+        conn.close()
+        return jsonify({"error": "You can only delete your own reply"}), 403
 
-                replies.pop(index)
-                save_data()
-                return jsonify({"success": True}), 200
-
-    return jsonify({"error": "Reply not found"}), 404
+    conn.execute("DELETE FROM reply_likes WHERE reply_id = ?", (reply_id,))
+    conn.execute("DELETE FROM replies WHERE id = ?", (reply_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True}), 200
 
 
 # --------------------------------------------------
@@ -1967,67 +1587,94 @@ def get_tutor_reviews():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
-    return jsonify(tutor_reviews), 200
+    conn = get_db()
+    rows = conn.execute(
+        """SELECT tr.*, t.name as tutor_name
+           FROM tutor_reviews tr
+           JOIN tutors t ON tr.tutor_id = t.id
+           ORDER BY tr.created_at ASC"""
+    ).fetchall()
+    conn.close()
+
+    # rebuild grouped-by-name response to match frontend expectation
+    result = {}
+    for row in rows:
+        name = row["tutor_name"]
+        if name not in result:
+            result[name] = []
+        result[name].append({
+            "id": row["id"],
+            "review_text": row["review_text"],
+            "author_email": row["author_email"],
+            "author_display": row["author_display"],
+            "post_visibility": row["post_visibility"],
+            "time": row["created_at"]
+        })
+
+    return jsonify(result), 200
 
 
 @app.route("/api/tutors/reviews", methods=["POST"])
 def create_tutor_review():
-    global next_tutor_review_id
-
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
     data = request.get_json()
-
     if not data or not data.get("tutor_name") or not data.get("review_text"):
         return jsonify({"error": "Missing data"}), 400
 
     tutor_name = data["tutor_name"].strip()
     review_text = data["review_text"].strip()
-
     if not tutor_name or not review_text:
         return jsonify({"error": "Missing data"}), 400
 
+    user_email = session["user"]
     visibility_choice = str(data.get("visibility_choice", "anonymous")).strip().lower()
-    identity = build_display_identity(session["user"], visibility_choice)
+    identity = build_display_identity(user_email, visibility_choice)
 
-    new_review = {
-        "id": next_tutor_review_id,
+    conn = get_db()
+    tutor = conn.execute("SELECT id FROM tutors WHERE name = ?", (tutor_name,)).fetchone()
+    if not tutor:
+        conn.close()
+        return jsonify({"error": "Tutor not found"}), 404
+
+    cur = conn.execute(
+        """INSERT INTO tutor_reviews (tutor_id, author_email, author_display, post_visibility, review_text)
+           VALUES (?, ?, ?, ?, ?)""",
+        (tutor["id"], user_email, identity["author_display"], identity["post_visibility"], review_text)
+    )
+    conn.commit()
+    new_id = cur.lastrowid
+    conn.close()
+
+    return jsonify({
+        "id": new_id,
         "review_text": review_text,
-        "author_email": session["user"],
+        "author_email": user_email,
         "author_display": identity["author_display"],
         "post_visibility": identity["post_visibility"],
         "time": "Just now"
-    }
-
-    if tutor_name not in tutor_reviews:
-        tutor_reviews[tutor_name] = []
-
-    tutor_reviews[tutor_name].append(new_review)
-    next_tutor_review_id += 1
-    save_data()
-
-    return jsonify(new_review), 201
+    }), 201
 
 
 @app.route("/api/tutors/reviews/<int:review_id>", methods=["DELETE"])
 def delete_tutor_review(review_id):
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
     user_email = session["user"]
 
-    for tutor_name, reviews in tutor_reviews.items():
-        for index, review in enumerate(reviews):
-            if review.get("id") == review_id:
-                if review.get("author_email") != user_email:
-                    return jsonify({"error": "You can only delete your own review"}), 403
+    conn = get_db()
+    row = conn.execute("SELECT * FROM tutor_reviews WHERE id = ?", (review_id,)).fetchone()
+    if not row:
+        conn.close()
+        return jsonify({"error": "Review not found"}), 404
+    if row["author_email"] != user_email:
+        conn.close()
+        return jsonify({"error": "You can only delete your own review"}), 403
 
-                reviews.pop(index)
-                save_data()
-                return jsonify({"success": True}), 200
-
-    return jsonify({"error": "Review not found"}), 404
+    conn.execute("DELETE FROM tutor_reviews WHERE id = ?", (review_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True}), 200
 
 
 # --------------------------------------------------
@@ -2038,28 +1685,29 @@ def get_tutor_ratings():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
-    rating_summary = {}
+    conn = get_db()
+    rows = conn.execute(
+        """SELECT t.name, AVG(tr.rating) as average, COUNT(tr.id) as count
+           FROM tutors t
+           LEFT JOIN tutor_ratings tr ON t.id = tr.tutor_id
+           GROUP BY t.id, t.name"""
+    ).fetchall()
+    conn.close()
 
-    for tutor_name, info in tutor_rating_data.items():
-        total = float(info.get("total", 0))
-        count = int(info.get("count", 0))
-        average = total / count if count > 0 else 0
-
-        rating_summary[tutor_name] = {
-            "average": average,
-            "count": count
+    result = {}
+    for row in rows:
+        result[row["name"]] = {
+            "average": round(row["average"] or 0, 1),
+            "count": row["count"] or 0
         }
-
-    return jsonify(rating_summary), 200
+    return jsonify(result), 200
 
 
 @app.route("/api/tutors/ratings", methods=["POST"])
 def submit_tutor_rating():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
     data = request.get_json()
-
     if not data or not data.get("tutor_name") or data.get("rating") is None:
         return jsonify({"error": "Missing data"}), 400
 
@@ -2070,37 +1718,34 @@ def submit_tutor_rating():
         rating_value = int(data["rating"])
     except (TypeError, ValueError):
         return jsonify({"error": "Rating must be a number"}), 400
-
     if rating_value < 1 or rating_value > 5:
         return jsonify({"error": "Rating must be between 1 and 5"}), 400
 
-    if tutor_name not in tutor_rating_data:
-        tutor_rating_data[tutor_name] = {
-            "total": 0,
-            "count": 0,
-            "by_user": {}
-        }
+    conn = get_db()
+    tutor = conn.execute("SELECT id FROM tutors WHERE name = ?", (tutor_name,)).fetchone()
+    if not tutor:
+        conn.close()
+        return jsonify({"error": "Tutor not found"}), 404
 
-    info = tutor_rating_data[tutor_name]
-    by_user = info.setdefault("by_user", {})
+    # upsert — one rating per user per tutor
+    conn.execute(
+        """INSERT INTO tutor_ratings (tutor_id, student_email, rating)
+           VALUES (?, ?, ?)
+           ON CONFLICT(tutor_id, student_email) DO UPDATE SET rating = excluded.rating""",
+        (tutor["id"], user_email, rating_value)
+    )
+    conn.commit()
 
-    # If this user already rated this tutor, replace old rating
-    if user_email in by_user:
-        old_rating = by_user[user_email]
-        info["total"] = float(info.get("total", 0)) - old_rating + rating_value
-        by_user[user_email] = rating_value
-    else:
-        info["total"] = float(info.get("total", 0)) + rating_value
-        info["count"] = int(info.get("count", 0)) + 1
-        by_user[user_email] = rating_value
-
-    average = info["total"] / info["count"] if info["count"] > 0 else 0
-    save_data()
+    row = conn.execute(
+        "SELECT AVG(rating) as average, COUNT(*) as count FROM tutor_ratings WHERE tutor_id = ?",
+        (tutor["id"],)
+    ).fetchone()
+    conn.close()
 
     return jsonify({
         "tutor_name": tutor_name,
-        "average": average,
-        "count": info["count"],
+        "average": round(row["average"] or 0, 1),
+        "count": row["count"],
         "your_rating": rating_value
     }), 200
 
@@ -2112,17 +1757,25 @@ def submit_tutor_rating():
 def get_tutor_availability():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
     tutor_name = request.args.get("tutor_name", "").strip()
-
     if not tutor_name:
         return jsonify({"error": "tutor_name is required"}), 400
 
-    available_slots = tutor_availability.get(tutor_name, [])
+    conn = get_db()
+    tutor = conn.execute("SELECT id FROM tutors WHERE name = ?", (tutor_name,)).fetchone()
+    if not tutor:
+        conn.close()
+        return jsonify({"tutor_name": tutor_name, "available_slots": []}), 200
+
+    rows = conn.execute(
+        "SELECT slot_text FROM tutor_availability WHERE tutor_id = ? AND is_booked = 0",
+        (tutor["id"],)
+    ).fetchall()
+    conn.close()
 
     return jsonify({
         "tutor_name": tutor_name,
-        "available_slots": available_slots
+        "available_slots": [r["slot_text"] for r in rows]
     }), 200
 
 
@@ -2130,9 +1783,7 @@ def get_tutor_availability():
 def create_tutor_booking():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
-
     data = request.get_json()
-
     if not data or not data.get("tutor_name") or not data.get("slot"):
         return jsonify({"error": "Missing data"}), 400
 
@@ -2140,22 +1791,32 @@ def create_tutor_booking():
     slot = data["slot"].strip()
     user_email = session["user"]
 
-    if tutor_name not in tutor_availability:
+    conn = get_db()
+    tutor = conn.execute("SELECT id FROM tutors WHERE name = ?", (tutor_name,)).fetchone()
+    if not tutor:
+        conn.close()
         return jsonify({"error": "Tutor not found"}), 404
 
-    if slot not in tutor_availability[tutor_name]:
+    slot_row = conn.execute(
+        "SELECT id, is_booked FROM tutor_availability WHERE tutor_id = ? AND slot_text = ?",
+        (tutor["id"], slot)
+    ).fetchone()
+
+    if not slot_row:
+        conn.close()
+        return jsonify({"error": "That slot does not exist"}), 404
+    if slot_row["is_booked"]:
+        conn.close()
         return jsonify({"error": "That time is no longer available"}), 400
 
-    # Remove booked slot from available list
-    tutor_availability[tutor_name].remove(slot)
-
-    # Save booking
-    tutor_bookings.setdefault(tutor_name, []).append({
-        "student_email": user_email,
-        "slot": slot
-    })
-
-    save_data()
+    # mark slot booked and record booking
+    conn.execute("UPDATE tutor_availability SET is_booked = 1 WHERE id = ?", (slot_row["id"],))
+    conn.execute(
+        "INSERT INTO tutor_bookings (tutor_id, student_email, slot_text) VALUES (?, ?, ?)",
+        (tutor["id"], user_email, slot)
+    )
+    conn.commit()
+    conn.close()
 
     return jsonify({
         "message": "Session booked successfully",
@@ -2166,24 +1827,21 @@ def create_tutor_booking():
 
 @app.route("/api/tutors/request", methods=["POST"])
 def create_tutor_request():
-    global tutor_requests
-
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
     form = request.form
-    name = form.get("name", "").strip()
-    email = form.get("email", "").strip().lower()
-    major = form.get("major", "").strip()
-    year = form.get("year", "").strip()
-    subjects = form.get("subjects", "").strip()
-    phone = form.get("phone", "").strip()
-    experience = form.get("experience", "").strip()
+    name         = form.get("name", "").strip()
+    email        = form.get("email", "").strip().lower()
+    major        = form.get("major", "").strip()
+    year         = form.get("year", "").strip()
+    subjects     = form.get("subjects", "").strip()
+    phone        = form.get("phone", "").strip()
+    experience   = form.get("experience", "").strip()
     availability = form.get("availability", "").strip()
 
     if not name or not email or not major or not year or not subjects or not experience or not availability:
         return jsonify({"error": "Name, email, major, year, subjects, experience, and availability are required"}), 400
-
     if not email.endswith("@mynsu.nova.edu"):
         return jsonify({"error": "Only NSU student emails allowed"}), 400
 
@@ -2202,22 +1860,20 @@ def create_tutor_request():
             counter += 1
         resume.save(saved_resume_path)
 
-    request_record = {
-        "id": len(tutor_requests) + 1,
-        "name": name,
-        "email": email,
-        "major": major,
-        "year": year,
-        "subjects": subjects,
-        "phone": phone,
-        "experience": experience,
-        "availability": availability,
-        "resume_filename": saved_resume_name,
-        "submitted_by": session["user"]
-    }
+    conn = get_db()
+    conn.execute(
+        """INSERT INTO tutor_requests
+           (name, email, major, year, subjects, phone, experience, availability, resume_filename, submitted_by)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (name, email, major, year, subjects, phone, experience, availability, saved_resume_name, session["user"])
+    )
+    conn.commit()
+    conn.close()
 
-    tutor_requests.append(request_record)
-    save_data()
+    request_record = {
+        "name": name, "email": email, "major": major, "year": year,
+        "subjects": subjects, "phone": phone, "experience": experience, "availability": availability
+    }
 
     sent, message = send_tutor_request_email(
         request_record,
@@ -2235,5 +1891,4 @@ def create_tutor_request():
 # START SERVER
 # --------------------------------------------------
 if __name__ == "__main__":
-    load_data()
     app.run(host="0.0.0.0", port=5000, debug=True)
