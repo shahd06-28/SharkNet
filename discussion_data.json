@@ -263,7 +263,6 @@
         "Michael Brown": [],
         "Samantha Green": [],
         "Alice Susan": [
-            "Monday 12:00 PM",
             "Wednesday 4:00 PM",
             "Friday 10:00 AM"
         ],
@@ -317,7 +316,12 @@
                 "slot": "Friday 4:00 PM"
             }
         ],
-        "Alice Susan": [],
+        "Alice Susan": [
+            {
+                "student_email": "sd2383@mynsu.nova.edu",
+                "slot": "Monday 12:00 PM"
+            }
+        ],
         "Jane Doe": [],
         "John Smith": [],
         "David Wilson": [],
