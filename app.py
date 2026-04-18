@@ -1086,7 +1086,6 @@ function openTutorRequestModal() {
     const status = box.querySelector(".request-status");
     if (currentUserEmail) {
         form.querySelector('input[name="email"]').value = currentUserEmail;
-        form.querySelector('input[name="name"]').value = currentUserEmail.split("@")[0];
     }
 
     box.querySelector(".request-cancel-btn").addEventListener("click", () => overlay.remove());
