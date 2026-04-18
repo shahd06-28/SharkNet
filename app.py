@@ -130,7 +130,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.querySelectorAll(".featured-section .card").forEach(card => {
         const titleEl = card.querySelector("h3");
-        const buttonEl = card.querySelector("button");1rTargets[title];
+        const buttonEl = card.querySelector("button");
+        if (!titleEl || !buttonEl) return;
+
+        const title = titleEl.textContent.trim();
+        const target = discussionTargets[title] || tutorTargets[title];
         if (!target) return;
 
         const go = () => { window.location.href = target; };
@@ -748,10 +752,41 @@ if (major) {
 # --------------------------------------------------
 # RUNTIME SCRIPT INJECTION FOR ORIGINAL tutors.html
 # --------------------------------------------------
+TUTORS_MODAL_HTML = r"""
+<div id="booking-modal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h3 id="tutor-name-modal">Tutor Name</h3>
+
+        <div class="booking-section">
+            <p>Select a date:</p>
+            <div id="date-buttons" class="button-grid"></div>
+        </div>
+
+        <div class="booking-section">
+            <p>Select a time:</p>
+            <div id="time-buttons" class="button-grid"></div>
+        </div>
+
+        <button id="confirm-booking" class="confirm-btn">Confirm Booking</button>
+    </div>
+</div>
+"""
+
 TUTORS_RUNTIME_SCRIPT = r"""
 <script>
 const selectedTutorRatings = {};
 const currentUserEmail = {{CURRENT_USER_EMAIL_JSON}};
+
+const tutorsSchedule = {
+    "Michael Brown": { dates: ["Monday", "Wednesday", "Friday"], times: ["1pm", "3pm", "6pm"] },
+    "Samantha Green": { dates: ["Tuesday", "Thursday", "Saturday"], times: ["2pm", "4pm", "5pm"] },
+    "Alice Susan": { dates: ["Monday", "Thursday", "Friday"], times: ["12pm", "3pm", "6pm"] },
+    "Jane Doe": { dates: ["Tuesday", "Wednesday", "Friday"], times: ["1pm", "4pm", "6pm"] },
+    "John Smith": { dates: ["Monday", "Wednesday", "Thursday"], times: ["10am", "2pm", "5pm"] },
+    "David Wilson": { dates: ["Tuesday", "Thursday", "Saturday"], times: ["11am", "3pm", "6pm"] },
+    "Emily Lee": { dates: ["Monday", "Wednesday", "Friday"], times: ["1pm", "3pm", "5pm"] }
+};
 
 function getQueryParam(name) {
     const params = new URLSearchParams(window.location.search);
@@ -825,6 +860,70 @@ function addRuntimeStyles() {
             margin-top: 8px;
             font-size: 13px;
             color: #333;
+        }
+        #booking-modal.hidden {
+            display: none;
+        }
+        #booking-modal.show {
+            display: flex;
+        }
+        #booking-modal.modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            align-items: center;
+            justify-content: center;
+            z-index: 9998;
+        }
+        #booking-modal .modal-content {
+            background: white;
+            border-radius: 14px;
+            padding: 22px;
+            width: min(92vw, 430px);
+            box-shadow: 0 10px 35px rgba(0,0,0,0.2);
+            position: relative;
+            text-align: center;
+        }
+        #booking-modal .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 14px;
+            font-size: 22px;
+            cursor: pointer;
+            line-height: 1;
+        }
+        #booking-modal .booking-section {
+            margin-top: 16px;
+            text-align: left;
+        }
+        #booking-modal .button-grid {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        #booking-modal .button-grid button {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            cursor: pointer;
+            background: #eef3ff;
+            color: #234;
+            font-weight: 600;
+        }
+        #booking-modal .button-grid button.selected {
+            background: #0d6efd;
+            color: white;
+        }
+        #booking-modal .confirm-btn {
+            margin-top: 18px;
+            border: none;
+            border-radius: 10px;
+            padding: 11px 16px;
+            cursor: pointer;
+            font-weight: 700;
+            background: #0d6efd;
+            color: white;
         }
     `;
     document.head.appendChild(style);
@@ -906,22 +1005,6 @@ function createTutorReviewElement(review) {
     return reviewDiv;
 }
 
-function ensureBookingBox(card) {
-    let bookingBox = card.querySelector(".booking-box");
-    if (!bookingBox) {
-        bookingBox = document.createElement("div");
-        bookingBox.className = "booking-box hidden";
-        bookingBox.innerHTML = `
-            <div class="booking-title"><strong>Available Sessions</strong></div>
-            <div class="booking-slots"></div>
-            <div class="booking-message"></div>
-        `;
-        const cardButtons = card.querySelector(".card-buttons");
-        cardButtons.insertAdjacentElement("afterend", bookingBox);
-    }
-    return bookingBox;
-}
-
 function updateRatingText(card, average) {
     const ratingSpan = card.querySelector(".rating");
     if (ratingSpan) ratingSpan.textContent = `⭐ ${average.toFixed(1)}`;
@@ -967,57 +1050,6 @@ async function loadTutorRatings() {
     } catch (error) {
         console.error("Load tutor ratings error:", error);
         alert("An error occurred while loading tutor ratings.");
-    }
-}
-
-async function renderBookingSlots(card, tutorName) {
-    const bookingBox = ensureBookingBox(card);
-    const slotsContainer = bookingBox.querySelector(".booking-slots");
-    const bookingMessage = bookingBox.querySelector(".booking-message");
-    slotsContainer.innerHTML = "";
-    bookingMessage.textContent = "";
-
-    try {
-        const response = await fetch(`/api/tutors/availability?tutor_name=${encodeURIComponent(tutorName)}`);
-        const result = await response.json();
-        if (!response.ok) {
-            bookingMessage.textContent = result.error || "Failed to load availability.";
-            return;
-        }
-
-        if (!result.available_slots || result.available_slots.length === 0) {
-            bookingMessage.textContent = "No open times right now.";
-            return;
-        }
-
-        result.available_slots.forEach(slot => {
-            const slotButton = document.createElement("button");
-            slotButton.className = "booking-slot-btn";
-            slotButton.textContent = slot;
-            slotButton.addEventListener("click", async () => {
-                try {
-                    const bookResponse = await fetch("/api/tutors/bookings", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ tutor_name: tutorName, slot: slot })
-                    });
-                    const bookResult = await bookResponse.json();
-                    if (!bookResponse.ok) {
-                        bookingMessage.textContent = bookResult.error || "Failed to book session.";
-                        return;
-                    }
-                    bookingMessage.textContent = `Booked: ${slot}`;
-                    await renderBookingSlots(card, tutorName);
-                } catch (error) {
-                    console.error("Booking error:", error);
-                    bookingMessage.textContent = "An error occurred while booking.";
-                }
-            });
-            slotsContainer.appendChild(slotButton);
-        });
-    } catch (error) {
-        console.error("Availability error:", error);
-        bookingMessage.textContent = "An error occurred while loading availability.";
     }
 }
 
@@ -1080,6 +1112,89 @@ function openTutorRequestModal() {
     });
 }
 
+function getBookingModalElements() {
+    return {
+        modal: document.getElementById("booking-modal"),
+        tutorNameModal: document.getElementById("tutor-name-modal"),
+        dateButtonsContainer: document.getElementById("date-buttons"),
+        timeButtonsContainer: document.getElementById("time-buttons"),
+        confirmBookingBtn: document.getElementById("confirm-booking")
+    };
+}
+
+function selectButton(selectedBtn, container) {
+    container.querySelectorAll("button").forEach(btn => btn.classList.remove("selected"));
+    selectedBtn.classList.add("selected");
+}
+
+function closeBookingModal() {
+    const { modal, dateButtonsContainer, timeButtonsContainer } = getBookingModalElements();
+    if (!modal) return;
+    if (dateButtonsContainer) dateButtonsContainer.innerHTML = "";
+    if (timeButtonsContainer) timeButtonsContainer.innerHTML = "";
+    modal.classList.add("hidden");
+    modal.classList.remove("show");
+}
+
+function openBookingModal(tutorName) {
+    addRuntimeStyles();
+
+    const {
+        modal,
+        tutorNameModal,
+        dateButtonsContainer,
+        timeButtonsContainer,
+        confirmBookingBtn
+    } = getBookingModalElements();
+
+    if (!modal || !tutorNameModal || !dateButtonsContainer || !timeButtonsContainer || !confirmBookingBtn) {
+        alert("Booking modal is missing from the page.");
+        return;
+    }
+
+    tutorNameModal.textContent = tutorName;
+    dateButtonsContainer.innerHTML = "";
+    timeButtonsContainer.innerHTML = "";
+
+    const schedule = tutorsSchedule[tutorName];
+    if (!schedule) {
+        alert("No schedule found for this tutor.");
+        return;
+    }
+
+    schedule.dates.forEach(date => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = date;
+        btn.addEventListener("click", () => selectButton(btn, dateButtonsContainer));
+        dateButtonsContainer.appendChild(btn);
+    });
+
+    schedule.times.forEach(time => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = time;
+        btn.addEventListener("click", () => selectButton(btn, timeButtonsContainer));
+        timeButtonsContainer.appendChild(btn);
+    });
+
+    confirmBookingBtn.onclick = () => {
+        const selectedDate = dateButtonsContainer.querySelector(".selected")?.textContent;
+        const selectedTime = timeButtonsContainer.querySelector(".selected")?.textContent;
+
+        if (!selectedDate || !selectedTime) {
+            alert("Please select both a date and time!");
+            return;
+        }
+
+        alert(`Booked ${tutorName} on ${selectedDate} at ${selectedTime}`);
+        closeBookingModal();
+    };
+
+    modal.classList.remove("hidden");
+    modal.classList.add("show");
+}
+
 document.querySelectorAll(".review-toggle").forEach(button => {
     button.addEventListener("click", () => {
         const reviewBox = button.closest(".tutor-card")?.querySelector(".review-box");
@@ -1138,13 +1253,9 @@ document.querySelectorAll(".tutor-card").forEach(card => {
         });
     }
 
-    if (bookBtn) {
-        bookBtn.addEventListener("click", async () => {
-            const bookingBox = ensureBookingBox(card);
-            bookingBox.classList.toggle("hidden");
-            if (!bookingBox.classList.contains("hidden")) {
-                await renderBookingSlots(card, tutorName);
-            }
+    if (bookBtn && tutorName) {
+        bookBtn.addEventListener("click", () => {
+            openBookingModal(tutorName);
         });
     }
 });
@@ -1187,6 +1298,19 @@ document.querySelectorAll(".post-review").forEach(button => {
     });
 });
 
+const bookingModal = document.getElementById("booking-modal");
+if (bookingModal) {
+    const closeBtn = bookingModal.querySelector(".close-btn");
+    if (closeBtn) {
+        closeBtn.addEventListener("click", closeBookingModal);
+    }
+    window.addEventListener("click", (e) => {
+        if (e.target === bookingModal) {
+            closeBookingModal();
+        }
+    });
+}
+
 const becomeTutorBtn = document.querySelector(".become-tutor-btn");
 if (becomeTutorBtn) becomeTutorBtn.addEventListener("click", openTutorRequestModal);
 
@@ -1211,7 +1335,6 @@ if (requestedTutor) {
 }
 </script>
 """
-
 
 
 # --------------------------------------------------
@@ -1242,9 +1365,23 @@ def serve_tutors_with_runtime_script():
     file_path = os.path.join(UI_DIR, "tutors.html")
     with open(file_path, "r", encoding="utf-8") as f:
         html = f.read()
+
     current_user_email_json = json.dumps(session.get("user", ""))
     injected_script = TUTORS_RUNTIME_SCRIPT.replace("{{CURRENT_USER_EMAIL_JSON}}", current_user_email_json)
-    html = re.sub(r"<script>[\s\S]*?</script>\s*</body>", injected_script + "\n</body>", html, count=1, flags=re.IGNORECASE)
+
+    if 'id="booking-modal"' not in html:
+        if re.search(r"</body>", html, flags=re.IGNORECASE):
+            html = re.sub(r"</body>", TUTORS_MODAL_HTML + "\n</body>", html, count=1, flags=re.IGNORECASE)
+        else:
+            html += TUTORS_MODAL_HTML
+
+    if re.search(r"<script>[\s\S]*?</script>\s*</body>", html, flags=re.IGNORECASE):
+        html = re.sub(r"<script>[\s\S]*?</script>\s*</body>", injected_script + "\n</body>", html, count=1, flags=re.IGNORECASE)
+    elif re.search(r"</body>", html, flags=re.IGNORECASE):
+        html = re.sub(r"</body>", injected_script + "\n</body>", html, count=1, flags=re.IGNORECASE)
+    else:
+        html += injected_script
+
     return Response(html, mimetype="text/html")
 
 
@@ -1749,80 +1886,6 @@ def submit_tutor_rating():
         "your_rating": rating_value
     }), 200
 
-
-# --------------------------------------------------
-# TUTOR AVAILABILITY / BOOKING ROUTES
-# --------------------------------------------------
-@app.route("/api/tutors/availability", methods=["GET"])
-def get_tutor_availability():
-    if "user" not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-    tutor_name = request.args.get("tutor_name", "").strip()
-    if not tutor_name:
-        return jsonify({"error": "tutor_name is required"}), 400
-
-    conn = get_db()
-    tutor = conn.execute("SELECT id FROM tutors WHERE name = ?", (tutor_name,)).fetchone()
-    if not tutor:
-        conn.close()
-        return jsonify({"tutor_name": tutor_name, "available_slots": []}), 200
-
-    rows = conn.execute(
-        "SELECT slot_text FROM tutor_availability WHERE tutor_id = ? AND is_booked = 0",
-        (tutor["id"],)
-    ).fetchall()
-    conn.close()
-
-    return jsonify({
-        "tutor_name": tutor_name,
-        "available_slots": [r["slot_text"] for r in rows]
-    }), 200
-
-
-@app.route("/api/tutors/bookings", methods=["POST"])
-def create_tutor_booking():
-    if "user" not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-    data = request.get_json()
-    if not data or not data.get("tutor_name") or not data.get("slot"):
-        return jsonify({"error": "Missing data"}), 400
-
-    tutor_name = data["tutor_name"].strip()
-    slot = data["slot"].strip()
-    user_email = session["user"]
-
-    conn = get_db()
-    tutor = conn.execute("SELECT id FROM tutors WHERE name = ?", (tutor_name,)).fetchone()
-    if not tutor:
-        conn.close()
-        return jsonify({"error": "Tutor not found"}), 404
-
-    slot_row = conn.execute(
-        "SELECT id, is_booked FROM tutor_availability WHERE tutor_id = ? AND slot_text = ?",
-        (tutor["id"], slot)
-    ).fetchone()
-
-    if not slot_row:
-        conn.close()
-        return jsonify({"error": "That slot does not exist"}), 404
-    if slot_row["is_booked"]:
-        conn.close()
-        return jsonify({"error": "That time is no longer available"}), 400
-
-    # mark slot booked and record booking
-    conn.execute("UPDATE tutor_availability SET is_booked = 1 WHERE id = ?", (slot_row["id"],))
-    conn.execute(
-        "INSERT INTO tutor_bookings (tutor_id, student_email, slot_text) VALUES (?, ?, ?)",
-        (tutor["id"], user_email, slot)
-    )
-    conn.commit()
-    conn.close()
-
-    return jsonify({
-        "message": "Session booked successfully",
-        "tutor_name": tutor_name,
-        "slot": slot
-    }), 201
 
 
 @app.route("/api/tutors/request", methods=["POST"])
